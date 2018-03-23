@@ -1,0 +1,26 @@
+
+MODELS
+
+Teapot
+http://casual-effects.com/data/index.html
+
+
+IMAGES
+
+Skyboxes
+http://www.zfight.com/misc/images/textures/envmaps/stormydays_large.jpg
+http://i.imgur.com/xoGVD3X.jpg
+-> shopped by D. Buckstein to fix seams
+
+High-resolution Earth & planets
+http://www.blenderguru.com/tutorials/create-a-realistic-earth/
+http://www.solarsystemscope.com/textures/
+http://www.celestiamotherlode.net/
+http://coryg89.github.io/assets/themes/img/normal1024x512.jpg
+
+Stone
+http://www.3dkingdoms.com/CW3D/Doc/displacement-maps.jpg
+
+Sprite sheet goldmine
+https://www.spriters-resource.com/
+Dragon Quest VI: https://www.spriters-resource.com/ds_dsi/dragonquest6realmsofrevelation/
