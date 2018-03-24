@@ -17,7 +17,7 @@
 /*
 	animal3D SDK: Minimal 3D Animation Framework
 	By Daniel S. Buckstein
-	
+
 	a3_DemoState.c/.cpp
 	Demo state function implementations.
 
@@ -269,7 +269,7 @@ void a3demo_loadGeometry(a3_DemoState *demoState)
 		sharedIndexStorage += a3indexStorageSpaceRequired(sceneCommonIndexFormat, proceduralShapesData[i].numIndices);
 	for (i = 0; i < loadedModelsCount; ++i)
 		sharedIndexStorage += a3indexStorageSpaceRequired(sceneCommonIndexFormat, loadedModelsData[i].numIndices);
-	
+
 
 	// create shared buffer
 	vbo_ibo = demoState->vbo_staticSceneObjectDrawBuffer;
@@ -319,7 +319,7 @@ void a3demo_loadGeometry(a3_DemoState *demoState)
 	// use fancy format for teapot
 	currentDrawable = demoState->draw_teapot;
 	sharedVertexStorage += a3geometryGenerateDrawable(currentDrawable, loadedModelsData + 0, vao, vbo_ibo, sceneCommonIndexFormat, 0, 0);
-	
+
 	// release data when done
 	for (i = 0; i < sceneShapesCount; ++i)
 		a3geometryReleaseData(sceneShapesData + i);
@@ -538,7 +538,7 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 // release objects
 // this is where the union array style comes in handy; don't need a single 
 //	release statement for each and every object... just iterate and release!
- 
+
 // utility to unload textures
 void a3demo_unloadTextures(a3_DemoState *demoState)
 {
@@ -649,12 +649,12 @@ void a3demo_initScene(a3_DemoState *demoState)
 	demoState->rbDrawable[2] = demoState->draw_sphere;
 	demoState->rbDrawable[3] = demoState->draw_sphere;
 	demoState->rbDrawable[4] = demoState->draw_sphere;
-	
+
 	demoState->rbDrawable[5] = demoState->draw_cylinder;
 	demoState->rbDrawable[6] = demoState->draw_cylinder;
 	demoState->rbDrawable[7] = demoState->draw_cylinder;
 	demoState->rbDrawable[8] = demoState->draw_cylinder;
-	
+
 	demoState->rbDrawable[9] = demoState->draw_box;
 	demoState->rbDrawable[10] = demoState->draw_box;
 	demoState->rbDrawable[11] = demoState->draw_box;
@@ -837,7 +837,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 		const a3_PhysicsWorldState worldState[1] = { *(demoState->physicsWorld->state) };
 
 		// copy other
-	
+
 		// unlock
 		a3physicsUnlockWorld(demoState->physicsWorld);
 
@@ -874,6 +874,12 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 	//	- inefficient but oh well it's just for quick and easy testing
 	//	- for each rigid body, for each other rigid body, do test
 	//	- if success, set colliding flag to true for hulls involved
+	a3_RayHit hit[1] = { 0 };
+	hit->param0 = 100.0f;
+
+	*demoState->rayHit = *hit;
+	demoState->hitIndex = -1;
+
 	memset(demoState->colliding, 0, sizeof(demoState->colliding));
 	for (i = 0; i < rigidBodyObjectCount; ++i)
 	{
@@ -888,8 +894,80 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 				}
 			}
 		}
+
+		switch ((demoState->physicsWorld->hull + i)->type)
+		{
+		case a3hullType_box:
+		{
+		
+			if (a3rayTestBoundingBox(hit, demoState->ray,
+				demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height], 
+				demoState->physicsWorld->hull[i].prop[a3hullProperty_depth],
+				demoState->physicsWorld->hull[i].transform->m, demoState->physicsWorld->hull[i].transformInv->m)
+				&& a3rayHitValidate(hit))
+			{
+				if (hit->param0 < demoState->rayHit->param0)
+				{
+					*demoState->rayHit = *hit;
+					demoState->hitIndex = 3;
+				}
+			}
+		}
+		break;
+		case a3hullType_plane:
+		{
+			a3vec4 test = demoState->ray->direction;
+			test.x = 0;
+			if (a3rayTestPlaneFinite(hit, demoState->ray, a3axis_z,
+				demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height],
+				demoState->physicsWorld->hull[i].transform->m)
+				&& a3rayHitValidate(hit))
+			{
+				if (hit->param0 < demoState->rayHit->param0)
+				{
+					*demoState->rayHit = *hit;
+					demoState->hitIndex = 0;
+				}
+			}
+		}
+		break;
+		case a3hullType_sphere:
+		{
+			if (a3rayTestSphere(hit, demoState->ray,
+				demoState->physicsWorld->hull[i].prop[a3hullProperty_radius],
+				demoState->physicsWorld->hull[i].transform->m)
+				&& a3rayHitValidate(hit))
+			{
+				if (hit->param0 < demoState->rayHit->param0)
+				{
+					*demoState->rayHit = *hit;
+					demoState->hitIndex = 1;
+				}
+			}
+		}
+		break;
+		case a3hullType_cylinder:
+		{
+			if (a3rayTestCylinderFinite(hit, demoState->ray, a3axis_z,
+				demoState->cylinderObject->scale.x, demoState->cylinderObject->scale.z,
+				demoState->cylinderObject->modelMat.m)
+				&& a3rayHitValidate(hit))
+			{
+				if (hit->param0 < demoState->rayHit->param0)
+				{
+					*demoState->rayHit = *hit;
+					demoState->hitIndex = 2;
+				}
+			}
+		}
+		break;
+		default:
+			break;
+		}
 	}
 }
+
+
 
 void a3demo_render(const a3_DemoState *demoState)
 {
@@ -1042,8 +1120,7 @@ void a3demo_render(const a3_DemoState *demoState)
 		a3real4x4TransformInverse(normalMat.m, modelViewMat.m);
 		a3real4x4Transpose(normalMat.m);
 		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uNrm, 1, normalMat.mm);
-		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, a3oneVec4.v);
-		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, demoState->hitIndex == i || 
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, demoState->hitIndex == i ||
 			demoState->colliding[i] ? red : a3oneVec4.v);
 		a3vertexRenderActiveDrawable();
 	}
@@ -1103,24 +1180,24 @@ void a3demo_render(const a3_DemoState *demoState)
 	}
 
 
-/*
-	// teapot
-	i = 0;
-	currentDrawable = demoState->draw_teapot;
-	currentSceneObject = demoState->planetObject + i;	// the sun is now a teapot
+	/*
+		// teapot
+		i = 0;
+		currentDrawable = demoState->draw_teapot;
+		currentSceneObject = demoState->planetObject + i;	// the sun is now a teapot
 
-	modelMatOrig = currentSceneObject->modelMat;
-	if (!useVerticalY)	// teapot's axis is Y
-		a3real4x4Product(modelMat.m, modelMatOrig.m, convertY2Z.m);
-	else
-		modelMat = modelMatOrig;
-	a3real4x4TransformInverseIgnoreScale(modelMatInv.m, modelMat.m);
-	a3real4x4Product(modelViewProjectionMat.m, demoState->camera->viewProjectionMat.m, modelMat.m);
+		modelMatOrig = currentSceneObject->modelMat;
+		if (!useVerticalY)	// teapot's axis is Y
+			a3real4x4Product(modelMat.m, modelMatOrig.m, convertY2Z.m);
+		else
+			modelMat = modelMatOrig;
+		a3real4x4TransformInverseIgnoreScale(modelMatInv.m, modelMat.m);
+		a3real4x4Product(modelViewProjectionMat.m, demoState->camera->viewProjectionMat.m, modelMat.m);
 
-	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, modelViewProjectionMat.mm);
-	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, planetColor[i]);
-	a3vertexActivateAndRenderDrawable(currentDrawable);
-*/
+		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, modelViewProjectionMat.mm);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, planetColor[i]);
+		a3vertexActivateAndRenderDrawable(currentDrawable);
+	*/
 
 	if (demoState->displayAxes)
 	{

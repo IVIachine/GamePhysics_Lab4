@@ -23,7 +23,8 @@ Ray casting and picking implementations.
 */
 
 #include "a3_Ray.h"
-
+#include <stdlib.h>
+#include<stdio.h>
 
 //-----------------------------------------------------------------------------
 // internal utilities
@@ -149,10 +150,29 @@ inline int a3rayTestSphere_internal(a3_RayHit *hit_out, const a3real4p rayOrigin
 	//		- Pythagorean again:	h^2 + b^2 = r^2
 	//								b^2 = r^2 - h^2
 
-	// ****TO-DO: 
-	//	- ray vs sphere test
+	a3real3Diff(diff_tmp, sphereCenter, rayOrigin);
 
-	return 0;
+	a3real projectedPoint;
+	projectedPoint = a3real3Dot(diff_tmp, rayDirection);
+	if (projectedPoint < 0)
+		return 0;
+
+	a3real tmp = a3real3Dot(diff_tmp, diff_tmp) - projectedPoint * projectedPoint;
+
+	if (tmp > sphereRadiusSq)
+		return 0;
+
+	a3real tmp2 = (a3real)a3sqrt(sphereRadiusSq - tmp);
+
+	hit_out->param0 = projectedPoint - tmp2;
+	hit_out->param1 = projectedPoint + tmp2;
+
+	a3real4ProductS(hit_out->hit0.v, rayDirection, hit_out->param0);
+	a3real4Add(hit_out->hit0.v, rayOrigin);
+
+	a3real4ProductS(hit_out->hit1.v, rayDirection, hit_out->param1);
+	a3real4Add(hit_out->hit1.v, rayOrigin);
+	return 1;
 }
 
 // infinite cylinder
@@ -217,14 +237,78 @@ inline int a3rayTestCylinderFinite_internal(a3_RayHit *hit_out, const a3real4p r
 }
 
 // axis-aligned box
-inline int a3rayTestAABB_internal(a3_RayHit *hit_out, const a3real3p rayOrigin, const a3real3p rayDirection, const a3real xmin, const a3real ymin, const a3real zmin, const a3real xmax, const a3real ymax, const a3real zmax)
+inline int a3rayTestAABB_internal(a3_RayHit *hit_out, const a3real3p rayOrigin, const a3real3p rayDirection, const a3real xMin, const a3real yMin, const a3real zMin, const a3real xMax, const a3real yMax, const a3real zMax)
 {
 	// help: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	a3real tmp;
 
-	// ****TO-DO: 
-	//	- implement ray vs AABB test
+	a3real min = (xMin - rayOrigin[0]) / rayDirection[0];
+	a3real max = (xMax - rayOrigin[0]) / rayDirection[0];
 
-	return 0;
+	if (min > max)
+	{
+		tmp = min;
+		min = max;
+		max = tmp;
+	}
+
+	a3real tyMin = (yMin - rayOrigin[1]) / rayDirection[1];
+	a3real tyMax = (yMax - rayOrigin[1]) / rayDirection[1];
+
+	if (tyMin > tyMax)
+	{
+		tmp = tyMin;
+		tyMin = tyMax;
+		tyMax = tmp;
+	}
+
+	if ((min > tyMax) || (tyMin > max))
+		return 0;
+
+	if (tyMin > min)
+		min = tyMin;
+
+	if (tyMax < max)
+		max = tyMax;
+
+	a3real tzMin = (zMin - rayOrigin[2]) / rayDirection[2];
+	a3real tzMax = (zMax - rayOrigin[2]) / rayDirection[2];
+
+	if (tzMin > tzMax)
+	{
+		tmp = tzMin;
+		tzMin = tzMax;
+		tzMax = tmp;
+	}
+
+	if ((min > tzMax) || (tzMin > max))
+		return 0;
+
+	if (tzMin > min)
+		min = tzMin;
+
+	if (tzMax < max)
+		max = tzMax;
+
+	a3vec4 tmpLoc, tmpLoc2;
+	tmpLoc.x = xMin;
+	tmpLoc.y = yMin;
+	tmpLoc.z = zMin;
+
+	tmpLoc2.x = xMax;
+	tmpLoc2.y = yMax;
+	tmpLoc2.z = zMax;
+
+	hit_out->param0 = min;
+	hit_out->param1 = max;
+
+	a3real4ProductS(hit_out->hit0.v, rayDirection, hit_out->param0);
+	a3real4Add(hit_out->hit0.v, rayOrigin);
+
+	a3real4ProductS(hit_out->hit1.v, rayDirection, hit_out->param1);
+	a3real4Add(hit_out->hit1.v, rayOrigin);
+
+	return 1;
 }
 
 

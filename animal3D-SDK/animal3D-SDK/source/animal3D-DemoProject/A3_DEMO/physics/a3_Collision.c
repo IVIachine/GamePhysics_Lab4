@@ -148,7 +148,13 @@ extern inline int a3collisionCreateHullPlane(a3_ConvexHull *hull_out, const a3_R
 		// ****TO-DO: 
 		//	- set properties
 		a3collisionResetHull_internal(hull_out);
+		hull_out->rb = rb;
+		hull_out->transform = transform;
+		hull_out->transformInv = transformInv;
 
+		hull_out->type = a3hullType_plane;
+		hull_out->prop[a3hullProperty_width] = width;
+		hull_out->prop[a3hullProperty_height] = height;
 		return hull_out->type;
 	}
 	return -1;
@@ -162,6 +168,15 @@ extern inline int a3collisionCreateHullBox(a3_ConvexHull *hull_out, const a3_Rig
 		// ****TO-DO: 
 		//	- set properties
 		a3collisionResetHull_internal(hull_out);
+		hull_out->rb = rb;
+		hull_out->transform = transform;
+		hull_out->transformInv = transformInv;
+
+		hull_out->type = a3hullType_box;
+		hull_out->prop[a3hullProperty_width] = width;
+		hull_out->prop[a3hullProperty_height] = height;
+		hull_out->prop[a3hullProperty_depth] = depth;
+		hull_out->axis = isAxisAligned;
 
 		return hull_out->type;
 	}
