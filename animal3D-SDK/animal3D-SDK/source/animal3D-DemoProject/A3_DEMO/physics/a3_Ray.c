@@ -1,25 +1,25 @@
 /*
-	Copyright 2011-2018 Daniel S. Buckstein
+Copyright 2011-2018 Daniel S. Buckstein
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-		http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
 
 /*
-	animal3D SDK: Minimal 3D Animation Framework
-	By Daniel S. Buckstein
-	
-	a3_Ray.c
-	Ray casting and picking implementations.
+animal3D SDK: Minimal 3D Animation Framework
+By Daniel S. Buckstein
+
+a3_Ray.c
+Ray casting and picking implementations.
 */
 
 #include "a3_Ray.h"
@@ -47,8 +47,8 @@ inline int a3pointTestSphere_internal(const a3real3p point, const a3real3p spher
 
 	// ****TO-DO: 
 	//	- implement point vs sphere test
-
-	return 0;
+	a3real3Diff(diff_tmp, point, sphereCenter);
+	return (a3real3LengthSquared(diff_tmp) <= sphereRadiusSq);
 }
 
 
@@ -60,9 +60,26 @@ inline int a3rayTestPlane_internal(a3_RayHit *hit_out, const a3real4p rayOrigin,
 	// resource: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection
 	// take dot product of ray direction and normal
 	// if they are perpendicular (zero), no intersection
-	
+
 	// ****TO-DO: 
 	//	- implement infinite plane test
+	const a3real dot = a3real3Dot(planeNormal, rayDirection);
+	if (dot != a3realZero)
+	{
+		//Ray will hit plane but where?!?!?!?!
+		//t = [(plane center - rayOrigin)dot (normal)] / [(ray direction) dot(normal)]
+
+		a3real3Diff(diff_tmp, planeCenter, rayOrigin);
+		hit_out->param0 = a3real3Dot(diff_tmp, planeNormal) / dot;
+
+
+		//hit point
+		//scale and add
+		a3real4ProductS(hit_out->hit0.v, rayDirection, hit_out->param0);
+		a3real4Add(hit_out->hit0.v, rayOrigin); //MUST USE 4 and not 3!
+
+		return 1;
+	}
 
 	return 0;
 }
@@ -73,7 +90,30 @@ inline int a3rayTestPlaneFinite_internal(a3_RayHit *hit_out, const a3real4p rayO
 	// ****TO-DO: 
 	//	- test against infinite plane
 	//	- constrain to limits
+	if (a3rayTestPlane_internal(hit_out, rayOrigin, rayDirection, planeCenter, planeNormal, diff_tmp))
+	{
+		//Projected v and lsq
+		a3real3 p;
+		a3real d2;
 
+		//height
+		a3real3Diff(diff_tmp, hit_out->hit0.v, planeCenter);
+
+		//width
+		a3real3Projected(p, diff_tmp, planeTangent);
+		d2 = a3real3LengthSquared(p);
+
+		if (d2 <= planeHalfWidthSq)
+		{
+			a3real3Projected(p, diff_tmp, planeBitangent);
+			d2 = a3real3LengthSquared(p);
+
+			if (d2 <= planeHalfHeightSq)
+			{
+				return 1;
+			}
+		}
+	}
 	return 0;
 }
 
@@ -81,11 +121,12 @@ inline int a3rayTestPlaneFinite_internal(a3_RayHit *hit_out, const a3real4p rayO
 inline int a3rayTestDisc_internal(a3_RayHit *hit_out, const a3real4p rayOrigin, const a3real4p rayDirection, const a3real3p discCenter, const a3real3p discNormal, const a3real discRadiusSq, a3real3p diff_tmp)
 {
 	// resource: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection
-	
+
 	// ****TO-DO: 
 	//	- test against infinite plane
 	//	- test point in circle
-
+	if (a3rayTestPlane_internal(hit_out, rayOrigin, rayDirection, discCenter, discNormal, diff_tmp))
+		return a3pointTestSphere_internal(hit_out->hit0.v, discCenter, discRadiusSq, diff_tmp);
 	return 0;
 }
 
@@ -182,7 +223,7 @@ inline int a3rayTestAABB_internal(a3_RayHit *hit_out, const a3real3p rayOrigin, 
 
 	// ****TO-DO: 
 	//	- implement ray vs AABB test
-	
+
 	return 0;
 }
 

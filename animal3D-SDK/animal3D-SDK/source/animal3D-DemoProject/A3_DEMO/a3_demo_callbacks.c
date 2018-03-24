@@ -124,7 +124,7 @@ inline void a3demo_raypickTest_internal(a3_DemoState *demoState)
 	*demoState->rayHit = *hit;
 	demoState->hitIndex = -1;
 
-/*
+
 	// test against objects in order, winner is closest
 	if (a3rayTestPlaneFinite(hit, demoState->ray, a3axis_z,
 		demoState->groundObject->scale.x, demoState->groundObject->scale.y,
@@ -173,7 +173,6 @@ inline void a3demo_raypickTest_internal(a3_DemoState *demoState)
 			demoState->hitIndex = 3;
 		}
 	}
-*/
 }
 
 

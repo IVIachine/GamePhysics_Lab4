@@ -1042,9 +1042,9 @@ void a3demo_render(const a3_DemoState *demoState)
 		a3real4x4TransformInverse(normalMat.m, modelViewMat.m);
 		a3real4x4Transpose(normalMat.m);
 		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uNrm, 1, normalMat.mm);
-	//	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, a3oneVec4.v);
-	//	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, demoState->hitIndex == i ? skyblue : a3oneVec4.v);
-		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, demoState->colliding[i] ? red : a3oneVec4.v);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, a3oneVec4.v);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, demoState->hitIndex == i || 
+			demoState->colliding[i] ? red : a3oneVec4.v);
 		a3vertexRenderActiveDrawable();
 	}
 
