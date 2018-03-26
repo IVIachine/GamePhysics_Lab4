@@ -131,47 +131,65 @@ inline int a3rayTestDisc_internal(a3_RayHit *hit_out, const a3real4p rayOrigin, 
 	return 0;
 }
 
+inline int solveQuadratic(const a3real *a, const a3real *b, const a3real *c, a3real *x0, a3real *x1)
+{
+	a3real discr = *b * *b - 4 * *a * *c;
+	if (discr < 0) 
+		return 0;
+	else if (discr == 0) 
+		*x0 = *x1 = (a3real)-0.5 * *b / *a;
+	else {
+		a3real q = (b > 0) ?
+			(a3real)-0.5 * (*b + (a3real)a3sqrt(discr)) :
+			(a3real)-0.5 * (*b - (a3real)a3sqrt(discr));
+		*x0 = q / *a;
+		*x1 = *c / q;
+	}
+	if (x0 > x1)
+	{
+		a3real tmp = *x0;
+		*x0 = *x1;
+		*x1 = tmp;
+	}
+
+	return 1;
+}
+
 // sphere
 inline int a3rayTestSphere_internal(a3_RayHit *hit_out, const a3real4p rayOrigin, const a3real4p rayDirection, const a3real3p sphereCenter, const a3real sphereRadiusSq, a3real3p diff_tmp)
 {
 	// ray vs sphere test: 
-	// good resource: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
-	// good resource: http://antongerdelan.net/opengl/raycasting.html
-	//	- calculate difference from ray origin to sphere center: L
-	//	- project difference vector onto ray direction vector (unit)
-	//		- shortcut: if dot product is negative, ray originates 
-	//			within or ahead of sphere; test fails: d = L dot D
-	//			(if the ray direction vector is unit length, the dot 
-	//			product represents the length of the projected vector)
-	//	- calculate distance from center of sphere to projected point: h
-	//		- Pythagorean theorem:	d^2 + h^2 = L^2
-	//								h^2 = L^2 - d^2
-	//	- check if intersection occurred: 
-	//		- Pythagorean again:	h^2 + b^2 = r^2
-	//								b^2 = r^2 - h^2
+	// CITE https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
 
+	//solved using analytic solution
 	a3real3Diff(diff_tmp, sphereCenter, rayOrigin);
-
-	a3real projectedPoint;
-	projectedPoint = a3real3Dot(diff_tmp, rayDirection);
-	if (projectedPoint < 0)
+	a3real a = a3real3Dot(rayDirection, rayDirection);
+	a3real b = 2 * a3real3Dot(rayDirection, diff_tmp);
+	a3real c = a3real3Dot(diff_tmp, diff_tmp) - sphereRadiusSq;
+	if (!solveQuadratic(&a, &b, &c, &hit_out->param0, &hit_out->param1)) 
 		return 0;
 
-	a3real tmp = a3real3Dot(diff_tmp, diff_tmp) - projectedPoint * projectedPoint;
-
-	if (tmp > sphereRadiusSq)
-		return 0;
-
-	a3real tmp2 = (a3real)a3sqrt(sphereRadiusSq - tmp);
-
-	hit_out->param0 = projectedPoint - tmp2;
-	hit_out->param1 = projectedPoint + tmp2;
+	hit_out->param0 = a3absolute(hit_out->param0);
+	hit_out->param1 = a3absolute(hit_out->param1);
 
 	a3real4ProductS(hit_out->hit0.v, rayDirection, hit_out->param0);
 	a3real4Add(hit_out->hit0.v, rayOrigin);
 
 	a3real4ProductS(hit_out->hit1.v, rayDirection, hit_out->param1);
 	a3real4Add(hit_out->hit1.v, rayOrigin);
+
+	if (hit_out->param0 > hit_out->param1)
+	{
+		a3real tmp = hit_out->param0;
+		hit_out->param0 = hit_out->param1;
+		hit_out->param1 = tmp;
+	}
+
+	if (hit_out->param0 < 0) 
+		hit_out->param0 = hit_out->param1;
+	if (hit_out->param0 < 0) 
+		return 0; 
+
 	return 1;
 }
 

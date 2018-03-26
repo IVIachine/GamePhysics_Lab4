@@ -112,7 +112,6 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_box[3].position.z = +5.0f;
 	world->rb_box[3].velocity.x = +5.0f;
 
-
 	// set up hulls
 	for (i = j = 0; i < 1; ++i, ++j)
 	a3collisionCreateHullPlane(world->hull_ground, world->rb_ground, world->state->transform_rb + j, world->state->transformInv_rb + j,
@@ -127,9 +126,20 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 			a3randomRange(a3realHalf, a3realTwo), a3randomRange(a3realOne, a3realFour), a3axis_z);
 
 	for (i = 0; i < 4; ++i, ++j)
-		a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-			a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 0);
-
+	{
+		if (i % 2 == 0)
+		{
+			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
+				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 2);
+		}
+		else
+		{
+			//Rotate a small amount
+			a3real4Set(world->state->rotation_rb[j].v, .25, 0, 0, 1);
+			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
+				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 1);
+		}
+	}
 
 	// no particles today
 	world->particlesActive = 0;
@@ -168,6 +178,8 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	for (i = 0; i < world->rigidbodiesActive; ++i)
 	{
 		state->position_rb[i].xyz = world->rigidbody[i].position;
+		state->rotation_rb[i] = world->state->rotation_rb[i];
+
 		// rotation
 		a3quaternionConvertToMat4(state->transform_rb[i].m, state->rotation_rb[i].v, state->position_rb[i].v);
 		a3real4x4TransformInverseIgnoreScale(state->transformInv_rb[i].m, state->transform_rb[i].m);
@@ -199,7 +211,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	// accumulate time
 	world->t += dt;
-
 
 	// write operation is locked
 	if (a3physicsLockWorld(world) > 0)
@@ -269,7 +280,7 @@ int a3physicsWorldStateReset(a3_PhysicsWorldState *worldState)
 		for (i = 0; i < physicsMaxCount_rigidbody; ++i)
 		{
 			worldState->position_rb[i] = a3wVec4;
-			worldState->rotation_rb[i] = a3wVec4;
+			//worldState->rotation_rb[i] = a3wVec4;
 			worldState->transform_rb[i] = a3identityMat4;
 			worldState->transformInv_rb[i] = a3identityMat4;
 		}
