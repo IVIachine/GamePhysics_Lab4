@@ -134,10 +134,14 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 		}
 		else
 		{
-			//Rotate a small amount
-			a3real4Set(world->state->rotation_rb[j].v, .25, 0, 0, 1);
+			////Rotate a small amount
+			a3real4Set(world->state->rotation_rb[j].v, 0, 0, -(a3real).45, 1);
 			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
 				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 1);
+
+			a3real3Set(world->rigidbody[j].velocity.v, (a3real)1, 0, 0);
+			/*a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
+				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 2);*/
 		}
 	}
 
