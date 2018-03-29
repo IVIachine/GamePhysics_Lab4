@@ -118,51 +118,68 @@ inline void a3demo_terminatePhysicsThread(a3_DemoState *demoState)
 // raypick test
 inline void a3demo_raypickTest_internal(a3_DemoState *demoState)
 {
-	a3_RayHit hit[1] = { 0 };
-	hit->param0 = 100.0f;
+	//a3_RayHit hit[1] = { 0 };
+	//hit->param0 = 100.0f;
+	//
+	//*demoState->rayHit = *hit;
+	//demoState->hitIndex = -1;
+	//
+	//
+	//// test against objects in order, winner is closest
+	//
+	//
+	//if (a3rayTestSphere(hit, demoState->ray, 
+	//	demoState->sphereObject->scale.x, 
+	//	demoState->sphereObject->modelMat.m)
+	//	&& a3rayHitValidate(hit))
+	//{
+	//	if (hit->param0 < demoState->rayHit->param0)
+	//	{
+	//		*demoState->rayHit = *hit;
+	//		demoState->hitIndex = 1;
+	//		printf("Sphere\n");
+	//	}
+	//}
+	//
+	//if (a3rayTestCylinderFinite(hit, demoState->ray, a3axis_z, 
+	//	demoState->cylinderObject->scale.x, demoState->cylinderObject->scale.z, 
+	//	demoState->cylinderObject->modelMat.m)
+	//	&& a3rayHitValidate(hit))
+	//{
+	//	if (hit->param0 < demoState->rayHit->param0)
+	//	{
+	//		*demoState->rayHit = *hit;
+	//		demoState->hitIndex = 2;
+	//		printf("Cylinder\n");
+	//	}
+	//}
+	//
+	//if (a3rayTestBoundingBox(hit, demoState->ray, 
+	//	demoState->boxObject->scale.x, demoState->boxObject->scale.y, demoState->boxObject->scale.z,
+	//	demoState->boxObject->modelMat.m, demoState->boxObject->modelMatInv.m)
+	//	&& a3rayHitValidate(hit))
+	//{
+	//	if (hit->param0 < demoState->rayHit->param0)
+	//	{
+	//		*demoState->rayHit = *hit;
+	//		demoState->hitIndex = 3;
+	//		printf("Bounding Box\n");
+	//	}
+	//}
 
-	*demoState->rayHit = *hit;
-	demoState->hitIndex = -1;
+	//if (a3rayTestBoundingBox(hit, demoState->ray,
+	//	demoState->boxObject->scale.x, demoState->boxObject->scale.y, demoState->boxObject->scale.z,
+	//	demoState->boxObject->modelMat.m, demoState->boxObject->modelMatInv.m)
+	//	&& a3rayHitValidate(hit))
+	//{
+	//	if (hit->param0 < demoState->rayHit->param0)
+	//	{
+	//		*demoState->rayHit = *hit;
+	//		demoState->hitIndex = 3;
+	//	}
+	//}
 
-
-	// test against objects in order, winner is closest
 	
-
-	if (a3rayTestSphere(hit, demoState->ray, 
-		demoState->sphereObject->scale.x, 
-		demoState->sphereObject->modelMat.m)
-		&& a3rayHitValidate(hit))
-	{
-		if (hit->param0 < demoState->rayHit->param0)
-		{
-			*demoState->rayHit = *hit;
-			demoState->hitIndex = 1;
-		}
-	}
-
-	if (a3rayTestCylinderFinite(hit, demoState->ray, a3axis_z, 
-		demoState->cylinderObject->scale.x, demoState->cylinderObject->scale.z, 
-		demoState->cylinderObject->modelMat.m)
-		&& a3rayHitValidate(hit))
-	{
-		if (hit->param0 < demoState->rayHit->param0)
-		{
-			*demoState->rayHit = *hit;
-			demoState->hitIndex = 2;
-		}
-	}
-
-	if (a3rayTestBoundingBox(hit, demoState->ray, 
-		demoState->boxObject->scale.x, demoState->boxObject->scale.y, demoState->boxObject->scale.z,
-		demoState->boxObject->modelMat.m, demoState->boxObject->modelMatInv.m)
-		&& a3rayHitValidate(hit))
-	{
-		if (hit->param0 < demoState->rayHit->param0)
-		{
-			*demoState->rayHit = *hit;
-			demoState->hitIndex = 3;
-		}
-	}
 }
 
 

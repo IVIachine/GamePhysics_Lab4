@@ -531,7 +531,6 @@ extern inline int a3rayTestCylinderFinite(a3_RayHit *hit_out, const a3_Ray *ray,
 		const a3real radiusSq = radius * radius;
 		const a3real bodyLenInvSq = a3real3LengthSquaredInverse(bodyDirection);
 		a3real3 diff_tmp;
-
 		a3rayHitReset_internal(hit_out, ray);
 		if (length > a3realZero)
 		{

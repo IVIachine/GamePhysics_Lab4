@@ -909,7 +909,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 				if (hit->param0 < demoState->rayHit->param0)
 				{
 					*demoState->rayHit = *hit;
-					demoState->hitIndex = 3;
+					demoState->hitIndex = i;
 				}
 			}
 		}
@@ -926,7 +926,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 				if (hit->param0 < demoState->rayHit->param0)
 				{
 					*demoState->rayHit = *hit;
-					demoState->hitIndex = 0;
+					demoState->hitIndex = i;
 				}
 			}
 		}
@@ -941,7 +941,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 				if (hit->param0 < demoState->rayHit->param0)
 				{
 					*demoState->rayHit = *hit;
-					demoState->hitIndex = 1;
+					demoState->hitIndex = i;
 				}
 			}
 		}
@@ -956,7 +956,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 				if (hit->param0 < demoState->rayHit->param0)
 				{
 					*demoState->rayHit = *hit;
-					demoState->hitIndex = 2;
+					demoState->hitIndex = i;
 				}
 			}
 		}

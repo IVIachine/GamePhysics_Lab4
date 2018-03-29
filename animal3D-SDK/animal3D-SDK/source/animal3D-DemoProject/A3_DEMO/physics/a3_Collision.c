@@ -71,8 +71,16 @@ inline int a3collisionTestPointSphere(
 inline int a3collisionTestPointAABB(
 	const a3real3p pointPosition_localToAABB, const a3real3p aabbMinExtents, const a3real3p aabbMaxExtents)
 {
-	// ****TO-DO: 
-	//	- implement test
+	// min_x <= x <= max_x
+	// min_y <= y <= max_y
+	// min_z <= z <= max_z
+	// COLLISION!
+	if ((aabbMinExtents[0] <= pointPosition_localToAABB[0] && aabbMaxExtents[0] >= pointPosition_localToAABB[0]) &&
+		(aabbMinExtents[1] <= pointPosition_localToAABB[1] && aabbMaxExtents[1] >= pointPosition_localToAABB[1]) &&
+		(aabbMinExtents[2] <= pointPosition_localToAABB[2] && aabbMaxExtents[2] >= pointPosition_localToAABB[2]))
+	{
+		return 1;
+	}
 
 	return 0;
 }
@@ -81,7 +89,14 @@ inline int a3collisionTestPlaneSphere(
 	const a3real3p planeCenter, const a3real3p planeTangent, const a3real3p planeBitangent, const a3real3p planeNormal, const a3real planeHalfWidth, const a3real planeHalfHeight, const a3real3p sphereCenter, const a3real sphereRadius, a3real3p diff_tmp)
 {
 	// ****TO-DO: 
-	//	- implement test
+	//	- implement test	
+
+	// plan:
+	// line from plane center to sphere center
+	// project to tangent and bitangent
+	// check the result's distance
+
+
 
 	return 0;
 }
@@ -91,6 +106,18 @@ inline int a3collisionTestPlaneAABB(
 {
 	// ****TO-DO: 
 	//	- implement test
+	// treat plane as AABB in 2 dimensions
+	// this is not the best way to do it, but it is A way
+	a3real3 planeMin, planeMax, tmp;
+	a3real3Add(a3real3Sum(planeMin, a3real3ProductS(planeMin, planeTangent_localToAABB, -planeHalfWidth), a3real3ProductS(tmp, planeBitangent_localToAABB, -planeHalfHeight)), planeCenter_localToAABB);
+	a3real3Add(a3real3Sum(planeMax, a3real3ProductS(planeMax, planeTangent_localToAABB, planeHalfWidth), a3real3ProductS(tmp, planeBitangent_localToAABB, planeHalfHeight)), planeCenter_localToAABB);
+
+	if ((aabbMinExtents[0] <= planeMax[0] && aabbMaxExtents[0] >= planeMin[0]) &&
+		(aabbMinExtents[1] <= planeMax[1] && aabbMaxExtents[1] >= planeMin[1]) &&
+		(aabbMinExtents[2] <= planeMax[2] && aabbMaxExtents[2] >= planeMin[2]))
+	{
+		return 1;
+	}
 
 	return 0;
 }
@@ -108,8 +135,17 @@ inline int a3collisionTestSpheres(
 inline int a3collisionTestSphereAABB(
 	const a3real3p sphereCenter_localToAABB, const a3real sphereRadius, const a3real3p aabbMinExtents, const a3real3p aabbMaxExtents, a3real3p diff_tmp)
 {
-	// ****TO-DO: 
-	//	- implement test
+	// are we inside the box
+	if (a3collisionTestPointAABB(sphereCenter_localToAABB, aabbMinExtents, aabbMaxExtents)) return 1;
+
+	// closest point to the sphere center on the box
+	diff_tmp[0] = (sphereCenter_localToAABB[0] < aabbMinExtents[0]) ? aabbMinExtents[0] : (sphereCenter_localToAABB[0] > aabbMaxExtents[0]) ? aabbMaxExtents[0] : sphereCenter_localToAABB[0];
+	diff_tmp[1] = (sphereCenter_localToAABB[1] < aabbMinExtents[1]) ? aabbMinExtents[1] : (sphereCenter_localToAABB[1] > aabbMaxExtents[1]) ? aabbMaxExtents[1] : sphereCenter_localToAABB[1];
+	diff_tmp[2] = (sphereCenter_localToAABB[2] < aabbMinExtents[2]) ? aabbMinExtents[2] : (sphereCenter_localToAABB[2] > aabbMaxExtents[2]) ? aabbMaxExtents[2] : sphereCenter_localToAABB[2];
+
+	a3real3Sub(diff_tmp, sphereCenter_localToAABB);
+	if (a3real3LengthSquared(diff_tmp) <= sphereRadius * sphereRadius) return 1;
+
 
 	return 0;
 }
@@ -117,8 +153,6 @@ inline int a3collisionTestSphereAABB(
 inline int a3collisionTestAABBs(
 	const a3real3p aabbMinExtents_a, const a3real3p aabbMaxExtents_a, const a3real3p aabbMinExtents_b, const a3real3p aabbMaxExtents_b, a3real3p diff_tmp)
 {
-	// ****TO-DO: 
-	//	- implement test
 	if ((aabbMinExtents_a[0] <= aabbMaxExtents_b[0] && aabbMaxExtents_a[0] >= aabbMinExtents_b[0]) &&
 		(aabbMinExtents_a[1] <= aabbMaxExtents_b[1] && aabbMaxExtents_a[1] >= aabbMinExtents_b[1]) &&
 		(aabbMinExtents_a[2] <= aabbMaxExtents_b[2] && aabbMaxExtents_a[2] >= aabbMinExtents_b[2]))
@@ -217,7 +251,16 @@ extern inline int a3collisionCreateHullCylinder(a3_ConvexHull *hull_out, const a
 		// ****TO-DO: 
 		//	- set properties
 		a3collisionResetHull_internal(hull_out);
+		hull_out->rb = rb;
+		hull_out->transform = transform;
+		hull_out->transformInv = transformInv;
 
+		hull_out->axis = normalAxis;
+
+		hull_out->type = a3hullType_cylinder;
+		hull_out->prop[a3hullProperty_radius] = radius;
+		hull_out->prop[a3hullProperty_radiusSq] = radius * radius;
+		hull_out->prop[a3hullProperty_length] = length;
 		return hull_out->type;
 	}
 	return -1;
@@ -267,6 +310,24 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 			break;
 			case a3hullType_box:
 			{
+				a3vec3 minB, maxB, diff;
+				if (hull_b->prop[a3hullFlag_isAxisAligned] == 2)
+				{
+					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_width] * a3realHalf;
+					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_width] * a3realHalf;
+
+					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_height] * a3realHalf;
+					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_height] * a3realHalf;
+
+					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_depth] * a3realHalf;
+					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_depth] * a3realHalf;
+					status = a3collisionTestSphereAABB(hull_a->transform->v3.v, hull_a->prop[a3hullProperty_radius], minB.v, maxB.v, diff.v);
+				}
+				else
+				{
+					
+				}
+
 				//if AA
 				//calc extents perform AABB test
 				//else

@@ -256,12 +256,12 @@ long a3physicsThread(a3_PhysicsWorld *world)
 			if (currSecond > prevSecond)
 			{
 				prevSecond = currSecond;
-				printf("\n physics time: %.4lf;  ticks: %llu \n     ups avg: %.4lf;  dt avg: %.4lf",
-					physicsTimer->totalTime,
-					physicsTimer->ticks,
-					(double)physicsTimer->ticks / physicsTimer->totalTime,
-					physicsTimer->totalTime / (double)physicsTimer->ticks
-				);
+				//printf("\n physics time: %.4lf;  ticks: %llu \n     ups avg: %.4lf;  dt avg: %.4lf",
+				//	physicsTimer->totalTime,
+				//	physicsTimer->ticks,
+				//	(double)physicsTimer->ticks / physicsTimer->totalTime,
+				//	physicsTimer->totalTime / (double)physicsTimer->ticks
+				//);
 			}
 		}
 	}
