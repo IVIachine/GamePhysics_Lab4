@@ -88,17 +88,19 @@ inline int a3collisionTestPointAABB(
 inline int a3collisionTestPlaneSphere(
 	const a3real3p planeCenter, const a3real3p planeTangent, const a3real3p planeBitangent, const a3real3p planeNormal, const a3real planeHalfWidth, const a3real planeHalfHeight, const a3real3p sphereCenter, const a3real sphereRadius, a3real3p diff_tmp)
 {
-	// ****TO-DO: 
-	//	- implement test	
+	a3real3Projected(diff_tmp, sphereCenter, planeNormal);
+	a3real3Sub(diff_tmp, planeCenter);
+	if (a3real3LengthSquared(diff_tmp) > sphereRadius * sphereRadius) return 0;
 
-	// plan:
-	// line from plane center to sphere center
-	// project to tangent and bitangent
-	// check the result's distance
+	a3real3Projected(diff_tmp, sphereCenter, planeTangent);
+	a3real3Sub(diff_tmp, planeCenter);
+	if (a3real3LengthSquared(diff_tmp) > (sphereRadius + planeHalfWidth) * (sphereRadius + planeHalfWidth)) return 0;
 
+	a3real3Projected(diff_tmp, sphereCenter, planeBitangent);
+	a3real3Sub(diff_tmp, planeCenter);
+	if (a3real3LengthSquared(diff_tmp) > (sphereRadius + planeHalfHeight) * (sphereRadius + planeHalfHeight)) return 0;
 
-
-	return 0;
+	return 1;
 }
 
 inline int a3collisionTestPlaneAABB(
@@ -122,14 +124,31 @@ inline int a3collisionTestPlaneAABB(
 	return 0;
 }
 
-inline int a3collisionTestSpheres(
+inline int a3collisionTestSpheres(//a3_ConvexHullCollision *collision_out,
 	const a3real3p sphereCenter_a, const a3real sphereRadius_a, const a3real3p sphereCenter_b, const a3real sphereRadius_b, a3real3p diff_tmp)
 {
 	// ****TO-DO: 
 	//	- implement test
 	const a3real sumRadii = sphereRadius_a + sphereRadius_b;
 	a3real3Diff(diff_tmp, sphereCenter_a, sphereCenter_b);
-	return (a3real3LengthSquared(diff_tmp) <= sumRadii * sumRadii);
+	if (a3real3LengthSquared(diff_tmp) <= sumRadii * sumRadii)
+	{
+		// generate contacts
+		//a3real3Normalize(diff_tmp);
+		//a3real3Set(collision_out->normal_b[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
+		//
+		//a3real3ProductS(collision_out->contact_b[0].v, diff_tmp, sphereRadius_b);
+		//a3real3Add(collision_out->contact_b[0].v, sphereCenter_b);
+		//
+		//a3real3Negate(diff_tmp);
+		//a3real3Set(collision_out->normal_a[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
+		//a3real3ProductS(collision_out->contact_a[0].v, diff_tmp, sphereRadius_a);
+		//a3real3Add(collision_out->contact_a[0].v, sphereCenter_a);
+		//
+		//collision_out->contactCount_a = collision_out->contactCount_b = 1;
+		return 1;
+	}
+	return 0;
 }
 
 inline int a3collisionTestSphereAABB(
@@ -352,7 +371,7 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 				{
 					a3vec3 temp;
 					a3real3Diff(temp.v, hull_a->transform->v3.v, hull_b->transform->v3.v);
-					a3real4ProductTransform(temp.v, temp.v, hull_a->transform->m);
+					a3real4ProductTransform(temp.v, temp.v, hull_a->transformInv->m);
 					a3real3Add(temp.v, hull_b->transform->v3.v);
 
 					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_halfwidth];
@@ -366,11 +385,6 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 
 					status = a3collisionTestSphereAABB(temp.v, hull_a->prop[a3hullProperty_radius], minB.v, maxB.v, diff.v);
 				}
-
-				//if AA
-				//calc extents perform AABB test
-				//else
-				//transform sphere to box space, perform AABB test
 			}
 			break;
 			default:
@@ -384,7 +398,35 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 			{
 			case a3hullType_sphere:
 			{
-				//Same as one above
+				a3vec3 minA, maxA, diff;
+				if (hull_b->prop[a3hullFlag_isAxisAligned] == 2)
+				{
+					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_halfwidth];
+
+					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_halfheight];
+
+					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_halfdepth];
+					status = a3collisionTestSphereAABB(hull_b->transform->v3.v, hull_b->prop[a3hullProperty_radius], minA.v, maxA.v, diff.v);
+				}
+				else
+				{
+					a3vec3 temp;
+					a3real3Diff(temp.v, hull_b->transform->v3.v, hull_a->transform->v3.v);
+					a3real4ProductTransform(temp.v, temp.v, hull_b->transform->m);
+					a3real3Add(temp.v, hull_a->transform->v3.v);
+
+					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_halfdepth];
+
+					status = a3collisionTestSphereAABB(temp.v, hull_b->prop[a3hullProperty_radius], minA.v, maxA.v, diff.v);
+				}
 			}
 			break;
 			case a3hullType_box:
@@ -392,97 +434,110 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 				a3vec3 minA, maxA, minB, maxB;
 				if (hull_a->prop[a3hullFlag_isAxisAligned] == 2 && hull_b->prop[a3hullFlag_isAxisAligned] == 2)
 				{
-					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_width] * a3realHalf;
-					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_width] * a3realHalf;
-
-					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_height] * a3realHalf;
-					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_height] * a3realHalf;
-
-					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_depth] * a3realHalf;
-					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_depth] * a3realHalf;
-
-					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_width] * a3realHalf;
-					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_width] * a3realHalf;
-					   			  							
-					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_height] * a3realHalf;
-					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_height] * a3realHalf;
-					   			  							
-					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_depth] * a3realHalf;
-					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_depth] * a3realHalf;
+					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_halfdepth];
+					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_halfwidth];
+					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_halfwidth];			
+					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_halfheight];
+					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_halfheight];
+					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_halfdepth];
+					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_halfdepth];
 
 					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);
 				}
-				else if (hull_a->prop[a3hullFlag_isAxisAligned] == 2 && hull_b->prop[a3hullFlag_isAxisAligned] != 2 ||
-					hull_a->prop[a3hullFlag_isAxisAligned] != 2 && hull_b->prop[a3hullFlag_isAxisAligned] == 2)
+				else if (hull_a->prop[a3hullFlag_isAxisAligned] == 2 && hull_b->prop[a3hullFlag_isAxisAligned] != 2)
 				{
-					a3mat4 transformedBox;
-					a3real4x4SetReal4x4(transformedBox.m, hull_a->transform->m);
-					a3real4x4MulTransform(transformedBox.m, hull_b->transformInv->m);
+					// calc new a transform
+					a3vec3 newTransA;
+					a3real3Diff(newTransA.v, hull_b->transform->v3.v, hull_a->transform->v3.v);
+					a3real4ProductTransform(newTransA.v, newTransA.v, hull_b->transformInv->m);
+					a3real3Add(newTransA.v, hull_a->transform->v3.v);
 
-					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_width] * a3realHalf;
-					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_width] * a3realHalf;
-
-					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_height] * a3realHalf;
-					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_height] * a3realHalf;
-
-					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_depth] * a3realHalf;
-					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_depth] * a3realHalf;
-
-					a3real4TransformProduct(minA.v, transformedBox.m, minA.v);
-					a3real4TransformProduct(maxA.v, transformedBox.m, maxA.v);
-
-					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_width] * a3realHalf;
-					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_width] * a3realHalf;
-
-					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_height] * a3realHalf;
-					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_height] * a3realHalf;
-
-					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_depth] * a3realHalf;
-					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_depth] * a3realHalf;
+					minA.x = newTransA.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = newTransA.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = newTransA.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = newTransA.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = newTransA.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = newTransA.z + hull_a->prop[a3hullProperty_halfdepth];
+					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_halfwidth];
+					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_halfwidth];
+					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_halfheight];
+					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_halfheight];
+					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_halfdepth];
+					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_halfdepth];
 
 					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);
+				}
+				else if (hull_a->prop[a3hullFlag_isAxisAligned] != 2 && hull_b->prop[a3hullFlag_isAxisAligned] == 2)
+				{
+					a3vec3 newTransB;
+					a3real3Diff(newTransB.v, hull_a->transform->v3.v, hull_b->transform->v3.v);
+					a3real4ProductTransform(newTransB.v, newTransB.v, hull_a->transformInv->m);
+					a3real3Add(newTransB.v, hull_b->transform->v3.v);
 
-					if (status == 1)
-						printf("HIT\n");
-					
-					/*if (status == 0)
-						break;
+					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_halfdepth];
+					minB.x = newTransB.x - hull_b->prop[a3hullProperty_halfwidth];
+					maxB.x = newTransB.x + hull_b->prop[a3hullProperty_halfwidth];
+					minB.y = newTransB.y - hull_b->prop[a3hullProperty_halfheight];
+					maxB.y = newTransB.y + hull_b->prop[a3hullProperty_halfheight];
+					minB.z = newTransB.z - hull_b->prop[a3hullProperty_halfdepth];
+					maxB.z = newTransB.z + hull_b->prop[a3hullProperty_halfdepth];
 
-					a3real4x4SetReal4x4(transformedBox.m, hull_b->transform->m);
-					a3real4x4MulTransform(transformedBox.m, hull_a->transformInv->m);
-
-					minA.x = hull_a->transform->v3.x;
-					maxA.x = minA.x + hull_a->prop[a3hullProperty_width];
-
-					minA.y = hull_a->transform->v3.y;
-					maxA.y = minA.y + hull_a->prop[a3hullProperty_height];
-
-					minA.z = hull_a->transform->v3.z;
-					maxA.z = minA.z + hull_a->prop[a3hullProperty_depth];
-
-					minB.x = transformedBox.v3.x;
-					maxB.x = minB.x + hull_b->prop[a3hullProperty_width];
-
-					minB.y = transformedBox.v3.y;
-					maxB.y = minB.y + hull_b->prop[a3hullProperty_height];
-
-					minB.z = transformedBox.v3.z;
-					maxB.z = minB.z + hull_b->prop[a3hullProperty_depth];
-
-					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);*/
+					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);
 				}
 				else
 				{
+					// calc new a transform
+					a3vec3 newTransA;
+					a3real3Diff(newTransA.v, hull_b->transform->v3.v, hull_a->transform->v3.v);
+					a3real4ProductTransform(newTransA.v, newTransA.v, hull_b->transformInv->m);
+					a3real3Add(newTransA.v, hull_a->transform->v3.v);
 
+					minA.x = newTransA.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = newTransA.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = newTransA.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = newTransA.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = newTransA.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = newTransA.z + hull_a->prop[a3hullProperty_halfdepth];
+					minB.x = hull_b->transform->v3.x - hull_b->prop[a3hullProperty_halfwidth];
+					maxB.x = hull_b->transform->v3.x + hull_b->prop[a3hullProperty_halfwidth];
+					minB.y = hull_b->transform->v3.y - hull_b->prop[a3hullProperty_halfheight];
+					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_halfheight];
+					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_halfdepth];
+					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_halfdepth];
+
+					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);
+					if (status == 0) break;
+
+					a3vec3 newTransB;
+					a3real3Diff(newTransB.v, hull_a->transform->v3.v, hull_b->transform->v3.v);
+					a3real4ProductTransform(newTransB.v, newTransB.v, hull_a->transformInv->m);
+					a3real3Add(newTransB.v, hull_b->transform->v3.v);
+
+					minA.x = hull_a->transform->v3.x - hull_a->prop[a3hullProperty_halfwidth];
+					maxA.x = hull_a->transform->v3.x + hull_a->prop[a3hullProperty_halfwidth];
+					minA.y = hull_a->transform->v3.y - hull_a->prop[a3hullProperty_halfheight];
+					maxA.y = hull_a->transform->v3.y + hull_a->prop[a3hullProperty_halfheight];
+					minA.z = hull_a->transform->v3.z - hull_a->prop[a3hullProperty_halfdepth];
+					maxA.z = hull_a->transform->v3.z + hull_a->prop[a3hullProperty_halfdepth];
+					minB.x = newTransB.x - hull_b->prop[a3hullProperty_halfwidth];
+					maxB.x = newTransB.x + hull_b->prop[a3hullProperty_halfwidth];
+					minB.y = newTransB.y - hull_b->prop[a3hullProperty_halfheight];
+					maxB.y = newTransB.y + hull_b->prop[a3hullProperty_halfheight];
+					minB.z = newTransB.z - hull_b->prop[a3hullProperty_halfdepth];
+					maxB.z = newTransB.z + hull_b->prop[a3hullProperty_halfdepth];
+
+					status = a3collisionTestAABBs(minA.v, maxA.v, minB.v, maxB.v, tmp);
 				}
-				//if both AABB
-				//Calc extents perform AABB test
-				//if One AABB
-				//calc extents on AABB, calc local extents on AABB, perform AABB test
-					//transform AABB into non-AABB, calculate local extents of orig, perform AABB test
-				//if neither
-				//transform first into other, calc first local, perform AABB
-					//transform other into first, calculate other local, perform AABB
 			}
 			break;
 			default:
