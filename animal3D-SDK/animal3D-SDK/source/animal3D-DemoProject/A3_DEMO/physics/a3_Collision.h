@@ -123,6 +123,12 @@ extern "C"
 		//	- add pertinent data
 
 		const a3_ConvexHull *hull_a, *hull_b;
+		//List of contact points and normals
+
+		a3vec3 contact_a[a3hullContact_maxCount], contact_b[a3hullContact_maxCount];
+		a3vec3 normal_a[a3hullContact_maxCount], normal_b[a3hullContact_maxCount];
+
+		unsigned int contactPointCount;
 	};
 
 

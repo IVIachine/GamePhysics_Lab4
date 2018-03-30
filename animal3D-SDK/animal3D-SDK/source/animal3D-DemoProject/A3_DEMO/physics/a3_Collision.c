@@ -122,14 +122,33 @@ inline int a3collisionTestPlaneAABB(
 	return 0;
 }
 
-inline int a3collisionTestSpheres(
+inline int a3collisionTestSpheres(a3_ConvexHullCollision *collisionOut,
 	const a3real3p sphereCenter_a, const a3real sphereRadius_a, const a3real3p sphereCenter_b, const a3real sphereRadius_b, a3real3p diff_tmp)
 {
 	// ****TO-DO: 
 	//	- implement test
 	const a3real sumRadii = sphereRadius_a + sphereRadius_b;
 	a3real3Diff(diff_tmp, sphereCenter_a, sphereCenter_b);
-	return (a3real3LengthSquared(diff_tmp) <= sumRadii * sumRadii);
+	if (a3real3LengthSquared(diff_tmp) <= sumRadii * sumRadii)
+	{
+		//generate contacts
+		a3real3Normalize(diff_tmp);
+		a3real3SetReal3(collisionOut->normal_a[0].v, diff_tmp);
+
+		//Got normal for B
+		a3real3SetReal3(collisionOut->normal_b[0].v, diff_tmp);
+		a3real3ProductS(collisionOut->contact_b[0].v, diff_tmp, sphereRadius_b);
+		a3real3Add(collisionOut->contact_b[0].v, sphereCenter_b);
+
+		a3real3Negate(diff_tmp);
+		a3real3SetReal3(collisionOut->normal_a[0].v, diff_tmp);
+		a3real3ProductS(collisionOut->contact_a[0].v, diff_tmp, sphereRadius_a);
+		a3real3Add(collisionOut->contact_a[0].v, sphereCenter_a);
+
+		return 1;
+	}
+
+	return 0;
 }
 
 inline int a3collisionTestSphereAABB(
@@ -329,7 +348,7 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 			{
 			case a3hullType_sphere:
 			{
-				status = a3collisionTestSpheres(hull_a->transform->v3.v, hull_a->prop[a3hullProperty_radius],
+				status = a3collisionTestSpheres(collision_out, hull_a->transform->v3.v, hull_a->prop[a3hullProperty_radius],
 					hull_b->transform->v3.v, hull_b->prop[a3hullProperty_radius], tmp);
 			}
 			break;
