@@ -22,6 +22,23 @@ a3_Ray.c
 Ray casting and picking implementations.
 */
 
+/*
+Tyler Chermely 0967813
+Charles McGarey 0955181
+
+EGP-425-01
+Lab 4
+3/30/2018
+
+I certify that this work is
+entirely our own. The assessor of this project may reproduce this project
+and provide copies to other academic staff, and/or communicate a copy of
+this project to a plagiarism-checking service, which may retain a copy of the
+project on its database.
+*/
+
+//****NOTE: Tyler did all of the raycast tests
+
 #include "a3_Ray.h"
 #include <stdlib.h>
 #include<stdio.h>

@@ -27,6 +27,20 @@
 	********************************************
 */
 
+/*
+Tyler Chermely 0967813
+Charles McGarey 0955181
+
+EGP-425-01
+Lab 4
+3/30/2018
+
+I certify that this work is
+entirely our own. The assessor of this project may reproduce this project
+and provide copies to other academic staff, and/or communicate a copy of
+this project to a plagiarism-checking service, which may retain a copy of the
+project on its database.
+*/
 
 #include "a3_dylib_config_export.h"
 #include "a3_DemoState.h"
@@ -63,7 +77,7 @@ inline void a3demo_initializeText(a3_TextRenderer *text)
 // consistent physics thread startup and shutdown
 inline void a3demo_initializePhysicsThread(a3_DemoState *demoState)
 {
-	a3real tmp0, tmp1;
+	a3real tmp0;
 	unsigned int i;
 
 	// reset world and launch thread
@@ -88,14 +102,6 @@ inline void a3demo_initializePhysicsThread(a3_DemoState *demoState)
 		tmp0 = demoState->physicsWorld->hull_sphere[i].prop[a3hullProperty_radius];
 		a3real3Set(demoState->sphereObject[i].scale.v, tmp0, tmp0, tmp0);
 		demoState->sphereObject[i].scaleMode = +1;
-	}
-	for (i = 0; i < 4; ++i)
-	{
-		// non-uniform scale: non-normal axes are radius, normal axis is body length
-		tmp0 = demoState->physicsWorld->hull_cylinder[i].prop[a3hullProperty_radius];
-		tmp1 = demoState->physicsWorld->hull_cylinder[i].prop[a3hullProperty_length];
-		a3real3Set(demoState->cylinderObject[i].scale.v, tmp0, tmp0, tmp1);
-		demoState->cylinderObject[i].scaleMode = -1;
 	}
 	for (i = 0; i < 4; ++i)
 	{

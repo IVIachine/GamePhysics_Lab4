@@ -22,6 +22,20 @@
 	Physics world function implementations.
 */
 
+/*
+Tyler Chermely 0967813
+Charles McGarey 0955181
+
+EGP-425-01
+Lab 4
+3/30/2018
+
+I certify that this work is
+entirely our own. The assessor of this project may reproduce this project
+and provide copies to other academic staff, and/or communicate a copy of
+this project to a plagiarism-checking service, which may retain a copy of the
+project on its database.
+*/
 
 #include "a3_PhysicsWorld.h"
 
@@ -57,6 +71,8 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	//	- add rotation to all
 	
 	// static shapes
+	
+
 	world->rb_sphere[0].position.y = -10.0f;
 	world->rb_sphere[0].position.z = +5.0f;
 
@@ -112,10 +128,14 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_box[3].position.z = +5.0f;
 	world->rb_box[3].velocity.x = +5.0f;
 
+	world->rb_ground[0].position.y = -50.0f;
+	world->rb_ground[0].position.z = +5.0f;
+	world->rb_ground[0].velocity.y = +5.0f;
+
 	// set up hulls
 	for (i = j = 0; i < 1; ++i, ++j)
 	a3collisionCreateHullPlane(world->hull_ground, world->rb_ground, world->state->transform_rb + j, world->state->transformInv_rb + j,
-		(a3real)(16.0), (a3real)(16.0), 1, a3axis_z);
+		(a3real)(7.0), (a3real)(7.0), 2, a3axis_z);
 
 	for (i = 0; i < 4; ++i, ++j)
 		a3collisionCreateHullSphere(world->hull_sphere + i, world->rb_sphere + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
