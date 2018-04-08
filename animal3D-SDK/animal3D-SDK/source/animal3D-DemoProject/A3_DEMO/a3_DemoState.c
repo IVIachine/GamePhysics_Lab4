@@ -927,6 +927,7 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 					*demoState->rayHit = *hit;
 					demoState->hitIndex = i;
 				}
+				
 			}
 		}
 		break;

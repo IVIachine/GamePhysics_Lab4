@@ -123,8 +123,6 @@ inline int a3collisionTestPlaneSphere(
 inline int a3collisionTestPlaneAABB(
 	const a3real3p planeCenter_localToAABB, const a3real3p planeTangent_localToAABB, const a3real3p planeBitangent_localToAABB, const a3real3p planeNormal_localToAABB, const a3real planeHalfWidth, const a3real planeHalfHeight, const a3real3p aabbMinExtents, const a3real3p aabbMaxExtents, a3real3p diff_tmp)
 {
-	// ****TO-DO: 
-	//	- implement test
 	// treat plane as AABB in 2 dimensions
 	// this is not the best way to do it, but it is A way
 	a3real3 planeMin, planeMax, tmp;
@@ -144,8 +142,6 @@ inline int a3collisionTestPlaneAABB(
 inline int a3collisionTestSpheres(a3_ConvexHullCollision *collision_out,
 	const a3real3p sphereCenter_a, const a3real sphereRadius_a, const a3real3p sphereCenter_b, const a3real sphereRadius_b, a3real3p diff_tmp)
 {
-	// ****TO-DO: 
-	//	- implement test
 	const a3real sumRadii = sphereRadius_a + sphereRadius_b;
 	a3real3Diff(diff_tmp, sphereCenter_a, sphereCenter_b);
 	if (a3real3LengthSquared(diff_tmp) <= sumRadii * sumRadii)
@@ -209,17 +205,22 @@ inline int a3collisionTestAABBs(a3_ConvexHullCollision *collision_out,
 		collision_out->contact_a[5].y = aabbMinExtents_a[1] < aabbMinExtents_b[1] ? aabbMinExtents_b[1] : aabbMinExtents_b[1];
 		collision_out->contact_a[5].z = aabbMinExtents_a[2] < aabbMinExtents_b[2] ? aabbMinExtents_b[2] : aabbMinExtents_b[2];
 
-
 		collision_out->contact_b[5].x = aabbMaxExtents_a[0] < aabbMaxExtents_b[0] ? aabbMaxExtents_b[0] : aabbMaxExtents_b[0];
 		collision_out->contact_b[5].y = aabbMaxExtents_a[1] < aabbMaxExtents_b[1] ? aabbMaxExtents_b[1] : aabbMaxExtents_b[1];
 		collision_out->contact_b[5].z = aabbMaxExtents_a[2] < aabbMaxExtents_b[2] ? aabbMaxExtents_b[2] : aabbMaxExtents_b[2];
 
-		diff_tmp[0] = (collision_out->contact_a[5].x + collision_out->contact_b[5].x) / 2;
-		diff_tmp[1] = (collision_out->contact_a[5].y + collision_out->contact_b[5].y) / 2;
-		diff_tmp[2] = (collision_out->contact_a[5].z + collision_out->contact_b[5].z) / 2;
 		// contact point
+		collision_out->contact_a[0].x = (collision_out->contact_a[5].x + collision_out->contact_b[5].x) / 2;
+		collision_out->contact_a[0].y = (collision_out->contact_a[5].y + collision_out->contact_b[5].y) / 2;
+		collision_out->contact_a[0].z = (collision_out->contact_a[5].z + collision_out->contact_b[5].z) / 2;
 
+		collision_out->contact_b[0] = collision_out->contact_a[0];
+		collision_out->contactCount_a = collision_out->contactCount_b = 1;
 
+		a3real3Diff(collision_out->normal_a[0].v, aabbMinExtents_b, aabbMinExtents_a);
+		a3real3Normalize(collision_out->normal_a[0].v);
+		collision_out->normal_b[0] = collision_out->normal_a[0];
+		a3real3Negate(collision_out->normal_b[0].v);
 
 		return 1;
 	}
@@ -544,7 +545,6 @@ extern inline int a3collisionTestConvexHulls(a3_ConvexHullCollision *collision_o
 					maxB.y = hull_b->transform->v3.y + hull_b->prop[a3hullProperty_halfheight];
 					minB.z = hull_b->transform->v3.z - hull_b->prop[a3hullProperty_halfdepth];
 					maxB.z = hull_b->transform->v3.z + hull_b->prop[a3hullProperty_halfdepth];
-
 					status = a3collisionTestAABBs(collision_out, minA.v, maxA.v, minB.v, maxB.v, tmp);
 				}
 				else if (hull_a->prop[a3hullFlag_isAxisAligned] == 2 && hull_b->prop[a3hullFlag_isAxisAligned] != 2)
