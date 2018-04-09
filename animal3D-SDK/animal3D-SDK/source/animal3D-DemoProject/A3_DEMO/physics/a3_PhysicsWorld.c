@@ -183,6 +183,22 @@ void a3physicsTerminate_internal(a3_PhysicsWorld *world)
 
 //-----------------------------------------------------------------------------
 
+void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a, a3_ConvexHull* hull_b)
+{
+	// TYLER WHY DOESN'T IT WORK
+	a3vec3 tempStorage, ts2;
+	a3real3ProductS(tempStorage.v, collision->normal_a[0].v, hull_a->rb->mass);
+	a3real3ProductS(ts2.v, collision->normal_b[0].v, hull_b->rb->mass);
+	a3rigidbodyApplyForceLocation(hull_a->rb,
+		ts2.v,
+		collision->contact_b[0].v);
+	a3rigidbodyApplyForceLocation(hull_b->rb, 
+		tempStorage.v,
+		collision->contact_b[0].v);
+}
+
+
+
 // physics simulation
 void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 {
@@ -215,10 +231,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	}
 	state->count_p = i;
 
-
-	a3_RayHit hit[1] = { 0 };
-	hit->param0 = 100.0f;
-
 	a3_ConvexHullCollision collision[1] = { 0 };
 
 	for (i = 0; i < world->rigidbodiesActive; ++i)
@@ -229,7 +241,8 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 			{
 				if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
 				{
-					// response logic here
+					a3handleCollision(collision, world->hull + i, world->hull + j);
+				
 				}
 			}
 		}
@@ -239,9 +252,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	//	- apply forces and torques
 
 
-	// ****TO-DO: 
-	//	- convert forces and torques
-	//	- integrate to get next step using choice algorithm
 	for (i = 0; i < world->rigidbodiesActive; ++i)
 	{
 		a3rigidbodyIntegrateEulerSemiImplicit(world->rigidbody + i, dt_r);

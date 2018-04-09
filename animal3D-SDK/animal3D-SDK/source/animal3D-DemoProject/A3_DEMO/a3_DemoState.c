@@ -828,12 +828,12 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 	const unsigned int graphicsObjectCount = sizeof(demoState->graphicsObjects) / sizeof(a3_DemoSceneObject);
 	const unsigned int rigidBodyObjectCount = sizeof(demoState->physicsRigidbodies) / sizeof(a3_DemoSceneObject);
 	const unsigned int particleObjectCount = sizeof(demoState->physicsParticles) / sizeof(a3_DemoSceneObject);
-	unsigned int i, j;
+	unsigned int i;
 
 	a3_DemoSceneObject *tmpObject;
 	a3mat4 tmpScale = a3identityMat4;
 
-	a3_ConvexHullCollision testCollision[1];
+	//a3_ConvexHullCollision testCollision[1];
 
 
 	// update scene objects

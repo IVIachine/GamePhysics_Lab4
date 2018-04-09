@@ -232,7 +232,7 @@ inline int a3collisionTestAABBs(a3_ConvexHullCollision *collision_out,
 //-----------------------------------------------------------------------------
 
 // create point hull
-extern inline int a3collisionCreateHullPoint(a3_ConvexHull *hull_out, const a3_RigidBody *rb)
+extern inline int a3collisionCreateHullPoint(a3_ConvexHull *hull_out, a3_RigidBody *rb)
 {
 	if (hull_out && rb)
 	{
@@ -246,7 +246,7 @@ extern inline int a3collisionCreateHullPoint(a3_ConvexHull *hull_out, const a3_R
 }
 
 // create plane hull
-extern inline int a3collisionCreateHullPlane(a3_ConvexHull *hull_out, const a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real width, const a3real height, const int isAxisAligned, const a3_Axis normalAxis)
+extern inline int a3collisionCreateHullPlane(a3_ConvexHull *hull_out, a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real width, const a3real height, const int isAxisAligned, const a3_Axis normalAxis)
 {
 	if (hull_out && rb)
 	{
@@ -273,7 +273,7 @@ extern inline int a3collisionCreateHullPlane(a3_ConvexHull *hull_out, const a3_R
 }
 
 // create box hull
-extern inline int a3collisionCreateHullBox(a3_ConvexHull *hull_out, const a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real width, const a3real height, const a3real depth, const int isAxisAligned)
+extern inline int a3collisionCreateHullBox(a3_ConvexHull *hull_out, a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real width, const a3real height, const a3real depth, const int isAxisAligned)
 {
 	if (hull_out && rb)
 	{
@@ -301,7 +301,7 @@ extern inline int a3collisionCreateHullBox(a3_ConvexHull *hull_out, const a3_Rig
 }
 
 // create sphere hull
-extern inline int a3collisionCreateHullSphere(a3_ConvexHull *hull_out, const a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real radius)
+extern inline int a3collisionCreateHullSphere(a3_ConvexHull *hull_out, a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real radius)
 {
 	if (hull_out && rb && radius > a3realZero)
 	{
@@ -321,7 +321,7 @@ extern inline int a3collisionCreateHullSphere(a3_ConvexHull *hull_out, const a3_
 }
 
 // create cylinder hull
-extern inline int a3collisionCreateHullCylinder(a3_ConvexHull *hull_out, const a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real radius, const a3real length, const a3_Axis normalAxis)
+extern inline int a3collisionCreateHullCylinder(a3_ConvexHull *hull_out, a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const a3real radius, const a3real length, const a3_Axis normalAxis)
 {
 	if (hull_out && rb)
 	{
@@ -344,7 +344,7 @@ extern inline int a3collisionCreateHullCylinder(a3_ConvexHull *hull_out, const a
 }
 
 // create mesh hull
-extern inline int a3collisionCreateHullMesh(a3_ConvexHull *hull_out, const a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const void *points, const unsigned int pointCount, const int is3D)
+extern inline int a3collisionCreateHullMesh(a3_ConvexHull *hull_out, a3_RigidBody *rb, const a3mat4 *transform, const a3mat4 *transformInv, const void *points, const unsigned int pointCount, const int is3D)
 {
 	if (hull_out && rb)
 	{
