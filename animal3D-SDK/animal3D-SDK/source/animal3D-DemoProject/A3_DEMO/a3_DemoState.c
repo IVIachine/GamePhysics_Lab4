@@ -890,98 +890,98 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 	//	- inefficient but oh well it's just for quick and easy testing
 	//	- for each rigid body, for each other rigid body, do test
 	//	- if success, set colliding flag to true for hulls involved
-	a3_RayHit hit[1] = { 0 };
-	hit->param0 = 100.0f;
-
-	*demoState->rayHit = *hit;
-	demoState->hitIndex = -1;
-
-	memset(demoState->colliding, 0, sizeof(demoState->colliding));
-	for (i = 0; i < rigidBodyObjectCount; ++i)
-	{
-		for (j = 0; j < rigidBodyObjectCount; ++j)
-		{
-			if (i != j)
-			{
-				if (a3collisionTestConvexHulls(testCollision, demoState->physicsWorld->hull + i, demoState->physicsWorld->hull + j) > 0)
-				{
-					demoState->colliding[i] += 1;
-					demoState->colliding[j] += 1;
-				}
-			}
-		}
-
-		switch ((demoState->physicsWorld->hull + i)->type)
-		{
-		case a3hullType_box:
-		{
-		
-			if (a3rayTestBoundingBox(hit, demoState->ray,
-				demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height], 
-				demoState->physicsWorld->hull[i].prop[a3hullProperty_depth],
-				demoState->physicsWorld->hull[i].transform->m, demoState->physicsWorld->hull[i].transformInv->m)
-				&& a3rayHitValidate(hit))
-			{
-				if (hit->param0 < demoState->rayHit->param0)
-				{
-					*demoState->rayHit = *hit;
-					demoState->hitIndex = i;
-				}
-				
-			}
-		}
-		break;
-		case a3hullType_plane:
-		{
-			a3vec4 test = demoState->ray->direction;
-			test.x = 0;
-			if (a3rayTestPlaneFinite(hit, demoState->ray, a3axis_z,
-				demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height],
-				demoState->physicsWorld->hull[i].transform->m)
-				&& a3rayHitValidate(hit))
-			{
-				if (hit->param0 < demoState->rayHit->param0)
-				{
-					*demoState->rayHit = *hit;
-					demoState->hitIndex = i;
-				}
-			}
-		}
-		break;
-		case a3hullType_sphere:
-		{
-			if (a3rayTestSphere(hit, demoState->ray,
-				demoState->physicsWorld->hull[i].prop[a3hullProperty_radius],
-				demoState->physicsWorld->hull[i].transform->m)
-				&& a3rayHitValidate(hit))
-			{
-				if (hit->param0 < demoState->rayHit->param0)
-				{
-					*demoState->rayHit = *hit;
-					demoState->hitIndex = i;
-				}
-			}
-		}
-		break;
-		case a3hullType_cylinder:
-		{
-			if (a3rayTestCylinderFinite(hit, demoState->ray, a3axis_z,
-				demoState->cylinderObject->scale.x, demoState->cylinderObject->scale.z,
-				demoState->cylinderObject->modelMat.m)
-				&& a3rayHitValidate(hit))
-			{
-				if (hit->param0 < demoState->rayHit->param0)
-				{
-					*demoState->rayHit = *hit;
-					demoState->hitIndex = i;
-				}
-			}
-		}
-		break;
-		default:
-			break;
-		}
-	}
+	//a3_RayHit hit[1] = { 0 };
+	//hit->param0 = 100.0f;
+	//
+	//*demoState->rayHit = *hit;
+	//demoState->hitIndex = -1;
+	//
+	//memset(demoState->colliding, 0, sizeof(demoState->colliding));
+	//for (i = 0; i < rigidBodyObjectCount; ++i)
+	//{
+	//	for (j = 0; j < rigidBodyObjectCount; ++j)
+	//	{
+	//		if (i != j)
+	//		{
+	//			if (a3collisionTestConvexHulls(testCollision, demoState->physicsWorld->hull + i, demoState->physicsWorld->hull + j) > 0)
+	//			{
+	//				demoState->colliding[i] += 1;
+	//				demoState->colliding[j] += 1;
+	//			}
+	//		}
+	//	}
+	//
+	//	switch ((demoState->physicsWorld->hull + i)->type)
+	//	{
+	//	case a3hullType_box:
+	//	{
+	//	
+	//		if (a3rayTestBoundingBox(hit, demoState->ray,
+	//			demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height], 
+	//			demoState->physicsWorld->hull[i].prop[a3hullProperty_depth],
+	//			demoState->physicsWorld->hull[i].transform->m, demoState->physicsWorld->hull[i].transformInv->m)
+	//			&& a3rayHitValidate(hit))
+	//		{
+	//			if (hit->param0 < demoState->rayHit->param0)
+	//			{
+	//				*demoState->rayHit = *hit;
+	//				demoState->hitIndex = i;
+	//			}
+	//			
+	//		}
+	//	}
+	//	break;
+	//	case a3hullType_plane:
+	//	{
+	//		a3vec4 test = demoState->ray->direction;
+	//		test.x = 0;
+	//		if (a3rayTestPlaneFinite(hit, demoState->ray, a3axis_z,
+	//			demoState->physicsWorld->hull[i].prop[a3hullProperty_width], demoState->physicsWorld->hull[i].prop[a3hullProperty_height],
+	//			demoState->physicsWorld->hull[i].transform->m)
+	//			&& a3rayHitValidate(hit))
+	//		{
+	//			if (hit->param0 < demoState->rayHit->param0)
+	//			{
+	//				*demoState->rayHit = *hit;
+	//				demoState->hitIndex = i;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	case a3hullType_sphere:
+	//	{
+	//		if (a3rayTestSphere(hit, demoState->ray,
+	//			demoState->physicsWorld->hull[i].prop[a3hullProperty_radius],
+	//			demoState->physicsWorld->hull[i].transform->m)
+	//			&& a3rayHitValidate(hit))
+	//		{
+	//			if (hit->param0 < demoState->rayHit->param0)
+	//			{
+	//				*demoState->rayHit = *hit;
+	//				demoState->hitIndex = i;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	case a3hullType_cylinder:
+	//	{
+	//		if (a3rayTestCylinderFinite(hit, demoState->ray, a3axis_z,
+	//			demoState->cylinderObject->scale.x, demoState->cylinderObject->scale.z,
+	//			demoState->cylinderObject->modelMat.m)
+	//			&& a3rayHitValidate(hit))
+	//		{
+	//			if (hit->param0 < demoState->rayHit->param0)
+	//			{
+	//				*demoState->rayHit = *hit;
+	//				demoState->hitIndex = i;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	default:
+	//		break;
+	//	}
+	//}
 }
 
 

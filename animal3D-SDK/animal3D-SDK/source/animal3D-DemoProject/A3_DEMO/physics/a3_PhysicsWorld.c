@@ -194,7 +194,7 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	const a3real dt_r = (a3real)(dt);
 
 	// generic counter
-	unsigned int i;
+	unsigned int i, j;
 
 
 	// ****TO-DO: 
@@ -215,6 +215,25 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	}
 	state->count_p = i;
 
+
+	a3_RayHit hit[1] = { 0 };
+	hit->param0 = 100.0f;
+
+	a3_ConvexHullCollision collision[1] = { 0 };
+
+	for (i = 0; i < world->rigidbodiesActive; ++i)
+	{
+		for (j = 0; j < world->rigidbodiesActive; ++j)
+		{
+			if (i != j)
+			{
+				if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
+				{
+					// response logic here
+				}
+			}
+		}
+	}
 
 	// ****TO-DO: 
 	//	- apply forces and torques
