@@ -177,6 +177,8 @@ inline int a3collisionTestSphereAABB(a3_ConvexHullCollision *collision_out,
 
 		a3real3Set(collision_out->normal_b[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
 		a3real3Set(collision_out->normal_a[0].v, -diff_tmp[0], -diff_tmp[1], -diff_tmp[2]);
+		printf("HERE\n");
+
 		return 1;
 	}
 

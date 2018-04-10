@@ -192,7 +192,7 @@ extern "C"
 
 				// rigid body objects
 				a3_DemoSceneObject groundObject[6];
-				a3_DemoSceneObject sphereObject[7];
+				a3_DemoSceneObject sphereObject[5];
 
 				// no named particles here
 			};

@@ -116,7 +116,7 @@ extern "C"
 			a3_RigidBody rigidbody[physicsMaxCount_rigidbody];
 			struct {
 				a3_RigidBody rb_ground[6];
-				a3_RigidBody rb_sphere[7];
+				a3_RigidBody rb_sphere[5];
 			};
 		};
 		unsigned int rigidbodiesActive;
@@ -132,7 +132,7 @@ extern "C"
 			a3_ConvexHull hull[physicsMaxCount_rigidbody];
 			struct {
 				a3_ConvexHull hull_ground[6];
-				a3_ConvexHull hull_sphere[7];
+				a3_ConvexHull hull_sphere[5];
 			};
 		};
 

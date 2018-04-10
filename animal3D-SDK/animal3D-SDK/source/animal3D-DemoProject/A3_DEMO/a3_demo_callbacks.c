@@ -94,14 +94,15 @@ inline void a3demo_initializePhysicsThread(a3_DemoState *demoState)
 	for (i = 0; i < 6; ++i)
 	{
 		a3vec3 tmp;
-		tmp.x = 60.0f;
-		tmp.y = 60.0f;
-		tmp.z = 60.0f;
+		tmp.x = demoState->physicsWorld->hull_ground[i].prop[0];
+		tmp.y = demoState->physicsWorld->hull_ground[i].prop[0];
+		tmp.z = demoState->physicsWorld->hull_ground[i].prop[0];
 
-		a3real3SetReal2Z(demoState->groundObject[i].scale.v, tmp.v, a3realOne);
+		a3real3SetReal2Z(demoState->groundObject[i].scale.v, a3real3ProductS(tmp.v, tmp.v, a3realTwo), a3realOne);
 		demoState->groundObject[i].scaleMode = -1;
 	}
-	for (i = 0; i < 7; ++i)
+
+	for (i = 0; i < 5; ++i)
 	{
 		// uniform scale: radius
 		tmp0 = demoState->physicsWorld->hull_sphere[i].prop[a3hullProperty_radius];

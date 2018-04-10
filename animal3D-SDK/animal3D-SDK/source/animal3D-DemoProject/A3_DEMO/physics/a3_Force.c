@@ -54,6 +54,8 @@ extern inline a3real3r a3forceGravity(a3real3p f_out, const a3real3p unitUpward,
 	//	- store gravity vector
 	//	- convert acceleration to force: F = ma
 	//		g = a -> F = mg
+	const a3real f_g = (a3real)(-9.80665) * mass;
+	f_out = a3real3ProductS(f_out, unitUpward, f_g);
 
 	return f_out;
 }
@@ -114,6 +116,9 @@ extern inline a3real3r a3forceDrag(a3real3p f_out, const a3real3p particleVeloci
 	//		- u is the flow velocity relative to object
 	//		- A is the cross-sectional area of the object
 	//		- C is the object's drag coefficient
+	a3real f_d = a3realHalf * fluidDensity * objectArea * objectDragCoeff;
+	a3real3Diff(f_out, fluidVelocity, particleVelocity);
+	a3real3MulS(f_out, f_d * a3real3Length(f_out));
 
 	return f_out;
 }
@@ -134,7 +139,7 @@ extern inline a3real3r a3forceDampingLinear(a3real3p f_out, const a3real3p parti
 {
 	// ****TO-DO: 
 	//	- implement simple linear damper: F = -cv
-
+	a3real3ProductS(f_out, particleVelocity, -dampingCoeff);
 	return f_out;
 }
 

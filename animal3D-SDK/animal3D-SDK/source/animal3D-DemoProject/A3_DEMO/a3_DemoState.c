@@ -661,11 +661,8 @@ void a3demo_initScene(a3_DemoState *demoState)
 	demoState->rbDrawable[6] = demoState->draw_sphere;
 	demoState->rbDrawable[7] = demoState->draw_sphere;
 	demoState->rbDrawable[8] = demoState->draw_sphere;
-
 	demoState->rbDrawable[9] = demoState->draw_sphere;
 	demoState->rbDrawable[10] = demoState->draw_sphere;
-	demoState->rbDrawable[11] = demoState->draw_sphere;
-	demoState->rbDrawable[12] = demoState->draw_sphere;
 
 
 	// reset
