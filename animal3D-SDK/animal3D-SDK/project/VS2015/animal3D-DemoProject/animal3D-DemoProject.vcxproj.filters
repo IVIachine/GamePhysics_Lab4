@@ -93,9 +93,6 @@
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Collision.c">
       <Filter>Source Files\common\A3_DEMO\physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\BSP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\animal3D-DemoProject\a3_dylib_config_export.h">

@@ -23,18 +23,9 @@
 */
 
 /*
-Tyler Chermely 0967813
-Charles McGarey 0955181
-
-EGP-425-01
-Lab 4
-3/30/2018
-
-I certify that this work is
-entirely our own. The assessor of this project may reproduce this project
-and provide copies to other academic staff, and/or communicate a copy of
-this project to a plagiarism-checking service, which may retain a copy of the
-project on its database.
+* IDs: 0955181 and 0967813
+* EGP 425-01 Project 3 4/10/18
+* We certify that this work is entirely our own.  The assessor of this project may reproduce this project and provide copies to other academic staff, and/or communicate a copy of this project to a plagiarism-checking service, which may retain a copy of the project on its database.
 */
 
 
@@ -148,16 +139,18 @@ inline int a3collisionTestSpheres(a3_ConvexHullCollision *collision_out,
 	{
 		// generate contacts
 		a3real3Normalize(diff_tmp);
-		a3real3Set(collision_out->normal_b[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
+		a3real3Set(collision_out->normal_a[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
 		
 		a3real3ProductS(collision_out->contact_b[0].v, diff_tmp, sphereRadius_b);
 		a3real3Add(collision_out->contact_b[0].v, sphereCenter_b);
 		
 		a3real3Negate(diff_tmp);
-		a3real3Set(collision_out->normal_a[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
+		a3real3Set(collision_out->normal_b[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
 		a3real3ProductS(collision_out->contact_a[0].v, diff_tmp, sphereRadius_a);
 		a3real3Add(collision_out->contact_a[0].v, sphereCenter_a);
 		
+		//printf("Normal A: (%lf %lf %lf) Normal B(%lf %lf %lf)\n", collision_out->normal_a[0].x, collision_out->normal_a[0].y, collision_out->normal_a[0].z, collision_out->normal_b[0].x, collision_out->normal_b[0].y, collision_out->normal_b[0].z);
+
 		collision_out->contactCount_a = collision_out->contactCount_b = 1;
 		return 1;
 	}

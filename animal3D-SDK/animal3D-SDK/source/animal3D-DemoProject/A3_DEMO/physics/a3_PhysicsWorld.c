@@ -23,18 +23,9 @@
 */
 
 /*
-Tyler Chermely 0967813
-Charles McGarey 0955181
-
-EGP-425-01
-Lab 4
-3/30/2018
-
-I certify that this work is
-entirely our own. The assessor of this project may reproduce this project
-and provide copies to other academic staff, and/or communicate a copy of
-this project to a plagiarism-checking service, which may retain a copy of the
-project on its database.
+* IDs: 0955181 and 0967813
+* EGP 425-01 Project 3 4/10/18
+* We certify that this work is entirely our own.  The assessor of this project may reproduce this project and provide copies to other academic staff, and/or communicate a copy of this project to a plagiarism-checking service, which may retain a copy of the project on its database.
 */
 
 #include "a3_PhysicsWorld.h"
@@ -225,18 +216,9 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 
 	world->rb_sphere[0].position.y = -10.0f;
 	world->rb_sphere[0].position.z = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere, 1.5f);
+	a3real3Set(world->rb_sphere[0].velocity.v, 0, 0, 0);
+	a3rigidbodySetMass(world->rb_sphere, 0.5f);
 
-
-	// set up hulls
-
-	for (int i = 0; i < 7; ++i, ++world->rigidbodiesActive)
-	{
-		a3rigidbodySetMass(world->rb_sphere + i, 0.5f);
-		a3collisionCreateHullSphere(world->hull_sphere + i, world->rb_sphere + i, world->state->transform_rb + world->rigidbodiesActive,
-			world->state->transformInv_rb + world->rigidbodiesActive,
-			a3randomRange(a3realHalf, a3realTwo));
-	}
 
 	// no particles today
 	world->particlesActive = 0;
@@ -265,35 +247,15 @@ void a3physicsTerminate_internal(a3_PhysicsWorld *world)
 
 void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a, a3_ConvexHull* hull_b)
 {
-	// TYLER WHY DOESN'T IT WORK
-	//a3vec3 tempStorage, ts2;
-	//a3real3ProductS(tempStorage.v, collision->normal_a[0].v, hull_a->rb->mass);
-	//a3real3ProductS(ts2.v, collision->normal_b[0].v, hull_b->rb->mass);
-	//a3rigidbodyApplyForceLocation(hull_a->rb,
-	//	ts2.v,
-	//	collision->contact_b[0].v);
-	//a3rigidbodyApplyForceDirect(hull_a->rb,
-	//	ts2.v);
-	//a3rigidbodyApplyForceLocation(hull_b->rb, 
-	//	tempStorage.v,
-	//	collision->contact_b[0].v);
-	//a3rigidbodyApplyForceDirect(hull_b->rb,
-	//	tempStorage.v);
+	// http://www.chrishecker.com/images/e/e7/Gdmphys3.pdf
 
-	/*if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-		printf("%lf, %lf, %lf\n", collision->normal_b[0].x, collision->normal_b[0].y, collision->normal_b[0].z);*/
-
-	// relative velocity
-	a3vec3 rVel, tmp;
+	a3vec3 rVel;
 	a3real3Diff(rVel.v, hull_a->rb->velocity.v, hull_b->rb->velocity.v);
 
-	a3real j = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+	a3real j1 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v)) / (a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
 
-	//if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-	//	printf("%lf\n", j);
-
-	a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j * hull_a->rb->massInv)));
-	a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j * hull_b->rb->massInv)));
+	a3real3ProductS(hull_a->rb->velocity.v, collision->normal_a[0].v, (j1 * hull_a->rb->mass));
+	a3real3ProductS(hull_b->rb->velocity.v, collision->normal_b[0].v, (j1 * hull_b->rb->mass));
 }
 
 // physics simulation
@@ -332,16 +294,18 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	if (world->framesSkipped > 5)
 	{
-		for (i = 0; i < world->rigidbodiesActive; ++i)
+		for (unsigned int x = 0; x < world->numBSPs; ++x)
 		{
-			for (j = 0; j < world->rigidbodiesActive; ++j)
+			for (i = 0; i < world->bsps[x].numContainedHulls; ++i)
 			{
-				if (i != j)
+				for (j = 0; j < world->bsps[x].numContainedHulls; ++j)
 				{
-					if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
+					if (i == j) continue;
+					if (a3collisionTestConvexHulls(collision, world->bsps[x].containedHulls[i], world->bsps[x].containedHulls[j]) > 0)
 					{
-						a3handleCollision(collision, world->hull + i, world->hull + j);
+						a3handleCollision(collision, world->bsps[x].containedHulls[i], world->bsps[x].containedHulls[j]);
 					}
+
 				}
 			}
 		}
@@ -356,7 +320,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	{
 		a3rigidbodyIntegrateEulerKinematic(world->rigidbody + i, dt_r);
 		a3real3ProductS(world->rigidbody[i].acceleration.v, world->rigidbody[i].force.v, world->rigidbody[i].massInv);
-		//printf("%lf %lf %lf \n", world->rigidbody[i].force.x, world->rigidbody[i].force.y, world->rigidbody[i].force.z);
 		//Add set to acceleration
 		a3real4ProductS(world->rigidbody[i].acceleration_a.v, world->rigidbody[i].torque.v, world->rigidbody[i].massInv);
 		a3real4Normalize(world->rigidbody[i].acceleration_a.v);
@@ -375,11 +338,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	updateHulls(world);
 
-
-	for (unsigned int i = 0; i < world->numBSPs; ++i)
-	{
-		//printf("BSP %i has %i hulls\n", i, world->bsps[i].numContainedHulls);
-	}
 
 	// write operation is locked
 	if (a3physicsLockWorld(world) > 0)
@@ -421,12 +379,6 @@ long a3physicsThread(a3_PhysicsWorld *world)
 			if (currSecond > prevSecond)
 			{
 				prevSecond = currSecond;
-				//printf("\n physics time: %.4lf;  ticks: %llu \n     ups avg: %.4lf;  dt avg: %.4lf",
-				//	physicsTimer->totalTime,
-				//	physicsTimer->ticks,
-				//	(double)physicsTimer->ticks / physicsTimer->totalTime,
-				//	physicsTimer->totalTime / (double)physicsTimer->ticks
-				//);
 			}
 		}
 	}

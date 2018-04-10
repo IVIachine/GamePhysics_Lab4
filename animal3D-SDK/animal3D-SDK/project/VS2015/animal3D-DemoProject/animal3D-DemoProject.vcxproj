@@ -182,7 +182,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\a3_DemoState.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\a3_demo_callbacks.c" />
-    <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\BSP.cpp" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Collision.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Force.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Integration.c" />
