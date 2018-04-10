@@ -23,18 +23,9 @@
 */
 
 /*
-Tyler Chermely 0967813
-Charles McGarey 0955181
-
-EGP-425-01
-Lab 4
-3/30/2018
-
-I certify that this work is
-entirely our own. The assessor of this project may reproduce this project
-and provide copies to other academic staff, and/or communicate a copy of
-this project to a plagiarism-checking service, which may retain a copy of the
-project on its database.
+* IDs: 0955181 and 0967813
+* EGP 425-01 Project 3 4/10/18
+* We certify that this work is entirely our own.  The assessor of this project may reproduce this project and provide copies to other academic staff, and/or communicate a copy of this project to a plagiarism-checking service, which may retain a copy of the project on its database.
 */
 
 #include "a3_PhysicsWorld.h"
@@ -200,12 +191,11 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_box[3].position.y = +10.0f;
 	world->rb_box[3].position.z = +5.0f;
 	world->rb_box[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_box + 3, 4.0f);
+	a3rigidbodySetMass(world->rb_box + 3, 0.75f);
 
 	world->rb_ground[0].position.y = -50.0f;
 	world->rb_ground[0].position.z = +5.0f;
-	world->rb_ground[0].velocity.y = +5.0f;
-	a3rigidbodySetMass(world->rb_ground, 2.0f);
+	a3rigidbodySetMass(world->rb_ground, 0.5f);
 
 	// set up hulls
 	for (i = j = 0; i < 1; ++i, ++j)
@@ -232,7 +222,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 			////Rotate a small amount
 			a3real4Set(world->state->rotation_rb[j].v, (a3real).18, (a3real).32, -(a3real).45, 1);
 			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 1);
+				a3realOne, a3realOne, a3realOne, 1);
 
 			a3real3Set(world->rigidbody[j].velocity.v, a3realThree, 0, 0);
 			/*a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
@@ -267,42 +257,16 @@ void a3physicsTerminate_internal(a3_PhysicsWorld *world)
 
 void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a, a3_ConvexHull* hull_b)
 {
-	// TYLER WHY DOESN'T IT WORK
-	//a3vec3 tempStorage, ts2;
-	//a3real3ProductS(tempStorage.v, collision->normal_a[0].v, hull_a->rb->mass);
-	//a3real3ProductS(ts2.v, collision->normal_b[0].v, hull_b->rb->mass);
-	//a3rigidbodyApplyForceLocation(hull_a->rb,
-	//	ts2.v,
-	//	collision->contact_b[0].v);
-	//a3rigidbodyApplyForceDirect(hull_a->rb,
-	//	ts2.v);
-	//a3rigidbodyApplyForceLocation(hull_b->rb, 
-	//	tempStorage.v,
-	//	collision->contact_b[0].v);
-	//a3rigidbodyApplyForceDirect(hull_b->rb,
-	//	tempStorage.v);
-
-	/*if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-		printf("%lf, %lf, %lf\n", collision->normal_b[0].x, collision->normal_b[0].y, collision->normal_b[0].z);*/
+	// http://www.chrishecker.com/images/e/e7/Gdmphys3.pdf
 
 	// relative velocity
-	a3vec3 rVel;// , tmp;
+	a3vec3 rVel;
 	a3real3Diff(rVel.v, hull_a->rb->velocity.v, hull_b->rb->velocity.v);
 
 	a3real j1 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
 	
 	a3real3ProductS(hull_a->rb->velocity.v, collision->normal_a[0].v, (j1 * hull_a->rb->mass));
 	a3real3ProductS(hull_b->rb->velocity.v, collision->normal_b[0].v, (j1 * hull_b->rb->mass));
-	//a3real3Sub(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j1 * hull_b->rb->massInv)));
-	//a3real3Add(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j1 * hull_a->rb->massInv)));
-
-	//a3real j2 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_b[0].v)) / (a3real3Dot(collision->normal_b[0].v, collision->normal_b[0].v)*(hull_b->rb->massInv + hull_a->rb->massInv));
-
-	//*if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-	//	printf("%lf\n", j);*/
-
-	//a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j2 * hull_b->rb->massInv)));
-	//a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j2 * hull_a->rb->massInv)));
 }
 
 // physics simulation
@@ -341,89 +305,19 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	if (world->framesSkipped > 5)
 	{
-		//for (int x = 0; x < world->)
-		for (i = 0; i < world->rigidbodiesActive; ++i)
+		for (unsigned int x = 0; x < world->numBSPs; ++x)
 		{
-			for (j = 0; j < world->rigidbodiesActive; ++j)
-			{	
-				if (i == j) continue;
-				if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
+			for (i = 0; i < world->bsps[x].numContainedHulls; ++i)
+			{
+				for (j = 0; j < world->bsps[x].numContainedHulls; ++j)
 				{
-					a3handleCollision(collision, world->hull + i, world->hull + j);
-					//switch (world->hull[i].type)
-					//{
-					//case a3hullType_sphere:
-					//	{
-					//		switch (world->hull[j].type)
-					//		{
-					//		case a3hullType_sphere:
-					//			{
-					//				a3vec3 fVel_a, fVel_b, tmp;
-					//				a3vec3 iVel_a = world->hull[i].rb->velocity;
-					//				//a3vec3 iVel_b = world->hull[j].rb->velocity;
-					//				a3real mass_a = world->hull[i].rb->mass;
-					//				a3real mass_b = world->hull[j].rb->mass;
-					//				// calculate vfinal for a
-					//				a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
-					//				// calculate vfinal for b
-					//				a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
-					//				world->hull[j].rb->velocity = fVel_b;
-					//				world->hull[i].rb->velocity = fVel_a;
-					//				break;
-					//			}
-					//		case a3hullType_plane:
-					//			{
-					//				a3vec3 normal;
-					//				switch (world->hull[j].axis)
-					//				{
-					//				case a3axis_x:
-					//					normal = a3xVec3;
-					//					if (world->hull[j].rb->rotation.x != 0 || world->hull[j].rb->rotation.y != 0 || world->hull[j].rb->rotation.z != 0)
-					//					{
-					//						
-					//					}
-					//				}
-					//				//a3vec3 fVel_a, fVel_b, tmp;
-					//				//a3vec3 iVel_a = world->hull[i].rb->velocity;
-					//				////a3vec3 iVel_b = world->hull[j].rb->velocity;
-					//				//a3real mass_a = world->hull[i].rb->mass;
-					//				//a3real mass_b = world->hull[j].rb->mass;
-					//				//// calculate vfinal for a
-					//				//a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
-					//				//// calculate vfinal for b
-					//				//a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
-					//				//world->hull[j].rb->velocity = fVel_b;
-					//				//world->hull[i].rb->velocity = fVel_a;
-					//				break;
-					//			}
-					//		}
-					//		break;
-					//	}
-					//case a3hullType_plane:
-					//	{
-					//		switch (world->hull[j].type)
-					//		{
-					//		case a3hullType_sphere:
-					//			{
-					//				//a3vec3 fVel_a, fVel_b, tmp;
-					//				//a3vec3 iVel_a = world->hull[i].rb->velocity;
-					//				////a3vec3 iVel_b = world->hull[j].rb->velocity;
-					//				//a3real mass_a = world->hull[i].rb->mass;
-					//				//a3real mass_b = world->hull[j].rb->mass;
-					//				//// calculate vfinal for a
-					//				//a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
-					//				//// calculate vfinal for b
-					//				//a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
-					//				//world->hull[j].rb->velocity = fVel_b;
-					//				//world->hull[i].rb->velocity = fVel_a;
-					//				break;
-					//			}
-					//		}
-					//	break;
-					//	}
-					//}
+					if (i == j) continue;
+					if (a3collisionTestConvexHulls(collision, world->bsps[x].containedHulls[i], world->bsps[x].containedHulls[j]) > 0)
+					{
+						a3handleCollision(collision, world->bsps[x].containedHulls[i], world->bsps[x].containedHulls[j]);
+					}
+
 				}
-				
 			}
 		}
 	}
@@ -437,7 +331,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	{
 		a3rigidbodyIntegrateEulerKinematic(world->rigidbody + i, dt_r);
 		a3real3ProductS(world->rigidbody[i].acceleration.v, world->rigidbody[i].force.v, world->rigidbody[i].massInv);
-		//printf("%lf %lf %lf \n", world->rigidbody[i].force.x, world->rigidbody[i].force.y, world->rigidbody[i].force.z);
 		//Add set to acceleration
 		a3real4ProductS(world->rigidbody[i].acceleration_a.v, world->rigidbody[i].torque.v, world->rigidbody[i].massInv);
 		a3real4Normalize(world->rigidbody[i].acceleration_a.v);
@@ -456,11 +349,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	updateHulls(world);
 
-
-	for (unsigned int i = 0; i < world->numBSPs; ++i)
-	{
-		printf("BSP %i has %i hulls\n", i, world->bsps[i].numContainedHulls);
-	}
 
 	// write operation is locked
 	if (a3physicsLockWorld(world) > 0)
@@ -502,12 +390,6 @@ long a3physicsThread(a3_PhysicsWorld *world)
 			if (currSecond > prevSecond)
 			{
 				prevSecond = currSecond;
-				//printf("\n physics time: %.4lf;  ticks: %llu \n     ups avg: %.4lf;  dt avg: %.4lf",
-				//	physicsTimer->totalTime,
-				//	physicsTimer->ticks,
-				//	(double)physicsTimer->ticks / physicsTimer->totalTime,
-				//	physicsTimer->totalTime / (double)physicsTimer->ticks
-				//);
 			}
 		}
 	}
