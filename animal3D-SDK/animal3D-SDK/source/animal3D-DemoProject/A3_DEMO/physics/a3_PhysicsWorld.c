@@ -49,6 +49,70 @@ project on its database.
 
 
 //-----------------------------------------------------------------------------
+int setupBSP(BSP * bsp, a3real3p min, a3real3p max)
+{
+	a3real3Set(bsp->min.v, min[0], min[1], min[2]);
+	a3real3Set(bsp->max.v, max[0], max[1], max[2]);
+
+	//printf("Creating BSP with lower bounds (%lf %lf %lf) and upper bounds (%lf %lf %lf)\n", min[0], min[1], min[2], max[0], max[1], max[2]);
+	return 0;
+}
+
+
+int setupBSPs(a3_PhysicsWorld * world, a3real3p min, a3real3p max, a3real3p units)
+{
+	a3vec3 boxUnits, tmp, tmpMin, tmpMax;
+
+	// get the number of BSPs per dimension
+	a3real3QuotientComp(boxUnits.v, a3real3Diff(tmp.v, max, min), units);
+
+	int num = 0;
+	for (int x = 0; x < (int)boxUnits.x; ++x)
+	{
+		for (int y = 0; y < (int)boxUnits.y; ++y)
+		{
+			for (int z = 0; z < (int)boxUnits.z; ++z)
+			{
+				++num;
+				tmpMin.x = min[0] + x * units[0];
+				tmpMin.y = min[1] + y * units[1];
+				tmpMin.z = min[2] + z * units[2];
+
+				a3real3Sum(tmpMax.v, tmpMin.v, units);
+
+				setupBSP(world->bsps + num, tmpMin.v, tmpMax.v);
+			}
+		}
+	}
+	world->numBSPs = num;
+	return 0;
+}
+
+int updateHulls(a3_PhysicsWorld * world)
+{
+	for (unsigned int j = 0; j < world->numBSPs; ++j)
+	{
+		world->bsps[j].numContainedHulls = 0;
+	}
+
+	for (unsigned int i = 0; i < world->rigidbodiesActive; ++i)
+	{
+		for (unsigned int j = 0; j < world->numBSPs; ++j)
+		{
+			if ((world->bsps[j].min.x <= (world->rigidbody + i)->position.x && world->bsps[j].max.x >= (world->rigidbody + i)->position.x) &&
+				(world->bsps[j].min.y <= (world->rigidbody + i)->position.y && world->bsps[j].max.y >= (world->rigidbody + i)->position.y) &&
+				(world->bsps[j].min.z <= (world->rigidbody + i)->position.z && world->bsps[j].max.z >= (world->rigidbody + i)->position.z))
+			{
+				world->bsps[j].containedHulls[world->bsps[j].numContainedHulls] = world->hull + i;
+				++world->bsps[j].numContainedHulls;
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+
 
 // internal utility for initializing and terminating physics world
 void a3physicsInitialize_internal(a3_PhysicsWorld *world)
@@ -180,6 +244,14 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	// raise initialized flag
 	world->init = 1;
 	world->firstFrame = 0;
+
+	a3vec3 min, max, units;
+	a3real3Set(min.v, -100, -100, -100);
+	a3real3Set(max.v, 100, 100, 100);
+	a3real3Set(units.v, 100, 100, 100);
+
+	setupBSPs(world, min.v, max.v, units.v);
+
 	// reset state
 	a3physicsWorldStateReset(world->state);
 }
@@ -289,6 +361,14 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	// accumulate time
 	world->t += dt;
+
+	updateHulls(world);
+
+
+	for (unsigned int i = 0; i < world->numBSPs; ++i)
+	{
+		printf("BSP %i has %i hulls\n", i, world->bsps[i].numContainedHulls);
+	}
 
 	// write operation is locked
 	if (a3physicsLockWorld(world) > 0)
