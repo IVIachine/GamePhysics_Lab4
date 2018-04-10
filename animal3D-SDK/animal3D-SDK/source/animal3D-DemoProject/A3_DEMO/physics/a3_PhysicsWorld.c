@@ -141,6 +141,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_ground[0].position.z = +5.0f;
 	world->rb_ground[0].velocity.y = +5.0f;
 	a3rigidbodySetMass(world->rb_ground, 2.0f);
+
 	// set up hulls
 	for (i = j = 0; i < 1; ++i, ++j)
 	a3collisionCreateHullPlane(world->hull_ground, world->rb_ground, world->state->transform_rb + j, world->state->transformInv_rb + j,
@@ -179,7 +180,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 
 	// raise initialized flag
 	world->init = 1;
-	world->firstFrame = 0;
+	world->framesSkipped = 0;
 	// reset state
 	a3physicsWorldStateReset(world->state);
 }
@@ -209,13 +210,20 @@ void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a,
 	//a3rigidbodyApplyForceDirect(hull_b->rb,
 	//	tempStorage.v);
 
+	/*if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
+		printf("%lf, %lf, %lf\n", collision->normal_b[0].x, collision->normal_b[0].y, collision->normal_b[0].z);*/
+
 	// relative velocity
 	a3vec3 rVel, tmp;
 	a3real3Diff(rVel.v, hull_a->rb->velocity.v, hull_b->rb->velocity.v);
 
-	a3real j = (-a3realTwo* a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+	a3real j = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+
+	if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
+		printf("%lf\n", j);
+
 	a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j * hull_a->rb->massInv)));
-	a3real3Add(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j * hull_b->rb->massInv)));
+	a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j * hull_b->rb->massInv)));
 }
 
 // physics simulation
@@ -252,19 +260,24 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	a3_ConvexHullCollision collision[1] = { 0 };
 
-	for (i = 0; i < world->rigidbodiesActive; ++i)
+	if (world->framesSkipped > 5)
 	{
-		for (j = 0; j < world->rigidbodiesActive; ++j)
+		for (i = 0; i < world->rigidbodiesActive; ++i)
 		{
-			if (i != j)
+			for (j = 0; j < world->rigidbodiesActive; ++j)
 			{
-				if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
+				if (i != j)
 				{
-					a3handleCollision(collision, world->hull + i, world->hull + j);
+					if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
+					{
+						a3handleCollision(collision, world->hull + i, world->hull + j);
+					}
 				}
 			}
 		}
 	}
+	else
+		world->framesSkipped++;
 
 	// ****TO-DO: 
 	//	- apply forces and torques
