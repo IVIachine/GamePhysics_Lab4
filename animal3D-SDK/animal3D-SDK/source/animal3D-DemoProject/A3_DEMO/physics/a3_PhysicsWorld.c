@@ -75,21 +75,22 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 
 	world->rb_sphere[0].position.y = -10.0f;
 	world->rb_sphere[0].position.z = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere, 1.5f);
+	a3real3Set(world->rb_sphere[0].velocity.v, 0, 0, 0);
+	a3rigidbodySetMass(world->rb_sphere, 0.5f);
 
 	world->rb_cylinder[0].position.y = 0.0f;
 	world->rb_cylinder[0].position.z = +5.0f;
 
 	world->rb_box[0].position.y = +10.0f;
 	world->rb_box[0].position.z = +5.0f;
-	a3rigidbodySetMass(world->rb_box, 1.5f);
+	a3rigidbodySetMass(world->rb_box, 0.5f);
 
 	// moving shapes
 	world->rb_sphere[1].position.x = -10.0f;
 	world->rb_sphere[1].position.y = -10.0f;
 	world->rb_sphere[1].position.z = +5.0f;
 	world->rb_sphere[1].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 1, 1.5f);
+	a3rigidbodySetMass(world->rb_sphere + 1, 0.5f);
 
 	world->rb_cylinder[1].position.x = -25.0f;
 	world->rb_cylinder[1].position.y = -10.0f;
@@ -100,18 +101,18 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_box[1].position.y = -10.0f;
 	world->rb_box[1].position.z = +5.0f;
 	world->rb_box[1].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_box + 1, 1.5f);
+	a3rigidbodySetMass(world->rb_box + 1, 0.5f);
 
 	world->rb_sphere[2].position.x = -10.0f;
 	world->rb_sphere[2].position.y = 0.0f;
 	world->rb_sphere[2].position.z = +5.0f;
 	world->rb_sphere[2].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 2, 1.5f);
+	a3rigidbodySetMass(world->rb_sphere + 2, 0.5f);
 
-	world->rb_cylinder[2].position.x = -25.0f;
-	world->rb_cylinder[2].position.y = 0.0f;
-	world->rb_cylinder[2].position.z = +5.0f;
-	world->rb_cylinder[2].velocity.x = +5.0f;
+	//world->rb_cylinder[2].position.x = -25.0f;
+	//world->rb_cylinder[2].position.y = 0.0f;
+	//world->rb_cylinder[2].position.z = +5.0f;
+	//world->rb_cylinder[2].velocity.x = +5.0f;
 
 	world->rb_box[2].position.x = -40.0f;
 	world->rb_box[2].position.y = 0.0f;
@@ -123,13 +124,13 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_sphere[3].position.y = +10.0f;
 	world->rb_sphere[3].position.z = +5.0f;
 	world->rb_sphere[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 3, 5.0f);
+	a3rigidbodySetMass(world->rb_sphere + 3, 0.5f);
 
-	world->rb_cylinder[3].position.x = -25.0f;
-	world->rb_cylinder[3].position.y = +10.0f;
-	world->rb_cylinder[3].position.z = +5.0f;
-	world->rb_cylinder[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_cylinder + 3, 3.0f);
+	//world->rb_cylinder[3].position.x = -25.0f;
+	//world->rb_cylinder[3].position.y = +10.0f;
+	//world->rb_cylinder[3].position.z = +5.0f;
+	//world->rb_cylinder[3].velocity.x = +5.0f;
+	//a3rigidbodySetMass(world->rb_cylinder + 3, 3.0f);
 
 	world->rb_box[3].position.x = -40.0f;
 	world->rb_box[3].position.y = +10.0f;
@@ -214,16 +215,23 @@ void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a,
 		printf("%lf, %lf, %lf\n", collision->normal_b[0].x, collision->normal_b[0].y, collision->normal_b[0].z);*/
 
 	// relative velocity
-	a3vec3 rVel, tmp;
+	a3vec3 rVel;// , tmp;
 	a3real3Diff(rVel.v, hull_a->rb->velocity.v, hull_b->rb->velocity.v);
 
-	a3real j = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+	a3real j1 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+	
+	a3real3ProductS(hull_a->rb->velocity.v, collision->normal_a[0].v, (j1 * hull_a->rb->mass));
+	a3real3ProductS(hull_b->rb->velocity.v, collision->normal_b[0].v, (j1 * hull_b->rb->mass));
+	//a3real3Sub(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j1 * hull_b->rb->massInv)));
+	//a3real3Add(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j1 * hull_a->rb->massInv)));
 
-	if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-		printf("%lf\n", j);
+	//a3real j2 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_b[0].v)) / (a3real3Dot(collision->normal_b[0].v, collision->normal_b[0].v)*(hull_b->rb->massInv + hull_a->rb->massInv));
 
-	a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j * hull_a->rb->massInv)));
-	a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j * hull_b->rb->massInv)));
+	//*if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
+	//	printf("%lf\n", j);*/
+
+	//a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j2 * hull_b->rb->massInv)));
+	//a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j2 * hull_a->rb->massInv)));
 }
 
 // physics simulation
@@ -262,17 +270,89 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	if (world->framesSkipped > 5)
 	{
+		//for (int x = 0; x < world->)
 		for (i = 0; i < world->rigidbodiesActive; ++i)
 		{
 			for (j = 0; j < world->rigidbodiesActive; ++j)
-			{
-				if (i != j)
+			{	
+				if (i == j) continue;
+				if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
 				{
-					if (a3collisionTestConvexHulls(collision, world->hull + i, world->hull + j) > 0)
-					{
-						a3handleCollision(collision, world->hull + i, world->hull + j);
-					}
+					a3handleCollision(collision, world->hull + i, world->hull + j);
+					//switch (world->hull[i].type)
+					//{
+					//case a3hullType_sphere:
+					//	{
+					//		switch (world->hull[j].type)
+					//		{
+					//		case a3hullType_sphere:
+					//			{
+					//				a3vec3 fVel_a, fVel_b, tmp;
+					//				a3vec3 iVel_a = world->hull[i].rb->velocity;
+					//				//a3vec3 iVel_b = world->hull[j].rb->velocity;
+					//				a3real mass_a = world->hull[i].rb->mass;
+					//				a3real mass_b = world->hull[j].rb->mass;
+					//				// calculate vfinal for a
+					//				a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
+					//				// calculate vfinal for b
+					//				a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
+					//				world->hull[j].rb->velocity = fVel_b;
+					//				world->hull[i].rb->velocity = fVel_a;
+					//				break;
+					//			}
+					//		case a3hullType_plane:
+					//			{
+					//				a3vec3 normal;
+					//				switch (world->hull[j].axis)
+					//				{
+					//				case a3axis_x:
+					//					normal = a3xVec3;
+					//					if (world->hull[j].rb->rotation.x != 0 || world->hull[j].rb->rotation.y != 0 || world->hull[j].rb->rotation.z != 0)
+					//					{
+					//						
+					//					}
+					//				}
+					//				//a3vec3 fVel_a, fVel_b, tmp;
+					//				//a3vec3 iVel_a = world->hull[i].rb->velocity;
+					//				////a3vec3 iVel_b = world->hull[j].rb->velocity;
+					//				//a3real mass_a = world->hull[i].rb->mass;
+					//				//a3real mass_b = world->hull[j].rb->mass;
+					//				//// calculate vfinal for a
+					//				//a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
+					//				//// calculate vfinal for b
+					//				//a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
+					//				//world->hull[j].rb->velocity = fVel_b;
+					//				//world->hull[i].rb->velocity = fVel_a;
+					//				break;
+					//			}
+					//		}
+					//		break;
+					//	}
+					//case a3hullType_plane:
+					//	{
+					//		switch (world->hull[j].type)
+					//		{
+					//		case a3hullType_sphere:
+					//			{
+					//				//a3vec3 fVel_a, fVel_b, tmp;
+					//				//a3vec3 iVel_a = world->hull[i].rb->velocity;
+					//				////a3vec3 iVel_b = world->hull[j].rb->velocity;
+					//				//a3real mass_a = world->hull[i].rb->mass;
+					//				//a3real mass_b = world->hull[j].rb->mass;
+					//				//// calculate vfinal for a
+					//				//a3real3QuotientS(fVel_a.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a - mass_b)), (mass_a + mass_b));
+					//				//// calculate vfinal for b
+					//				//a3real3QuotientS(fVel_b.v, a3real3ProductS(tmp.v, iVel_a.v, (mass_a + mass_b)), (mass_a + mass_b));
+					//				//world->hull[j].rb->velocity = fVel_b;
+					//				//world->hull[i].rb->velocity = fVel_a;
+					//				break;
+					//			}
+					//		}
+					//	break;
+					//	}
+					//}
 				}
+				
 			}
 		}
 	}
