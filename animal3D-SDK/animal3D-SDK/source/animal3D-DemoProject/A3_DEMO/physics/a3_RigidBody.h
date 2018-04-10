@@ -55,6 +55,7 @@ extern "C"
 		a3vec3 force;
 		a3real mass, massInv;
 
+		a3vec4 rotation;
 		a3vec4 torque;
 		a3vec4 velocity_a; //w(omega) dq/dt = (w)q/2
 		a3vec4 acceleration_a; //alpha dw/dt = a

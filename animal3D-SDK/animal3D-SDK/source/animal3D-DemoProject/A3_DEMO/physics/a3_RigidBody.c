@@ -23,7 +23,7 @@
 */
 
 #include "a3_RigidBody.h"
-
+#include <stdio.h>
 
 //-----------------------------------------------------------------------------
 
@@ -100,10 +100,11 @@ inline a3real3x3r a3rigidbodyRebaseMatrix_internal(a3real3x3p m_out, const a3rea
 // named Euler methods
 
 // explicit Euler: integrate current velocity
+// named Euler methods (described below)
 extern inline void a3rigidbodyIntegrateEulerExplicit(a3_RigidBody *rb, const a3real dt)
 {
 	a3vec3 d;
-
+	a3vec4 r;
 	//	x(t+dt) = x(t) + f(t)dt
 	//					 f(t) = dx/dt = v(t)
 	//	x(t+dt) = x(t) + v(t)dt
@@ -114,44 +115,77 @@ extern inline void a3rigidbodyIntegrateEulerExplicit(a3_RigidBody *rb, const a3r
 	//	v(t+dt) = v(t) + a(t)dt
 	a3real3Add(rb->velocity.v, a3real3ProductS(d.v, rb->acceleration.v, dt));
 
-
 	// ****TO-DO: 
-	//	- integrate rotation using explicit Euler formula
+	//	- integrate rotation
 	//	- integrate angular velocity
+
+	a3real4Add(rb->rotation.v, a3real4ProductS(r.v, a3quaternionConcat(r.v, rb->velocity_a.v, rb->rotation.v), dt * a3realHalf));
+	a3real4Add(rb->velocity_a.v, a3real4ProductS(r.v, rb->acceleration_a.v, dt));
+
+	a3real4Normalize(rb->rotation.v);
+	a3real4Normalize(rb->velocity_a.v);
 }
 
-// semi-implicit Euler: integrate next velocity
 extern inline void a3rigidbodyIntegrateEulerSemiImplicit(a3_RigidBody *rb, const a3real dt)
 {
 	a3vec3 d;
-
+	a3vec4 r;
 	//	v(t+dt) = v(t) + a(t)dt
 	a3real3Add(rb->velocity.v, a3real3ProductS(d.v, rb->acceleration.v, dt));
 
 	//	x(t+dt) = x(t) + v(t+dt)dt
 	a3real3Add(rb->position.v, a3real3ProductS(d.v, rb->velocity.v, dt));
 
-
 	// ****TO-DO: 
-	//	- integrate rotation using semi-implicit euler formula
 	//	- integrate angular velocity
+	//	- integrate rotation
+	a3real4Add(rb->velocity_a.v, a3real4ProductS(r.v, rb->acceleration_a.v, dt));
+	a3real4Add(rb->rotation.v, a3real4ProductS(r.v, a3quaternionConcat(r.v, rb->velocity_a.v, rb->rotation.v), dt * a3realHalf));
+
+	a3real4Normalize(rb->rotation.v);
+	a3real4Normalize(rb->velocity_a.v);
 }
 
-// kinematic: integrate average of current and next velocities
 extern inline void a3rigidbodyIntegrateEulerKinematic(a3_RigidBody *rb, const a3real dt)
 {
 	a3vec3 d;
-
+	a3vec4 r;
 	//	x(t+dt) = x(t) + v(t)dt + a(t)dt2 / 2
 	a3real3Add(rb->position.v, a3real3ProductS(d.v, a3real3Sum(d.v, rb->velocity.v, a3real3ProductS(d.v, rb->acceleration.v, a3realHalf * dt)), dt));
 
 	//	v(t+dt) = v(t) + a(t)dt
 	a3real3Add(rb->velocity.v, a3real3ProductS(d.v, rb->acceleration.v, dt));
 
-
 	// ****TO-DO: 
 	//	- integrate rotation using kinematic formula
 	//	- integrate angular velocity
+
+	//q(t+dt) = q(t) + w(t)q(t)dt/2 + (aq/2 + w(t)^2 q(t)/4)dt^2 / 2
+
+	//integrate rotation first
+	a3vec4 first, second, third, fourth, fifth;
+	a3real4ProductS(first.v, a3quaternionConcat(first.v, rb->velocity_a.v, rb->rotation.v), a3realHalf * dt);
+	a3real4ProductS(second.v, a3quaternionConcat(second.v, rb->acceleration_a.v, rb->rotation.v), a3realHalf);
+
+	a3quaternionConcat(fourth.v, rb->velocity_a.v, rb->velocity_a.v);
+	a3quaternionConcat(fifth.v, fourth.v, rb->rotation.v);
+	a3real4ProductS(third.v, fifth.v, a3realQuarter);
+
+	a3real4Add(second.v, third.v);
+	a3real4MulS(second.v, dt * dt);
+	a3real4MulS(second.v, a3realHalf);
+
+	a3real4Add(first.v, second.v);
+
+
+
+	a3real4Add(rb->rotation.v, first.v);
+
+	//integrate angular velocity
+	a3real4Add(rb->velocity_a.v, a3real4ProductS(r.v, rb->acceleration_a.v, dt));
+
+	a3real4Normalize(rb->rotation.v);
+	a3real4Normalize(rb->velocity_a.v);
 }
 
 
