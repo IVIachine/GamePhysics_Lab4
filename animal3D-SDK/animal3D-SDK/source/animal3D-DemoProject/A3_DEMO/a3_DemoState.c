@@ -658,23 +658,23 @@ void a3demo_initScene(a3_DemoState *demoState)
 	demoState->demoModeCount = 1;
 
 
+
 	// drawable pointers for these objects
 	demoState->rbDrawable[0] = demoState->draw_plane;
+	demoState->rbDrawable[1] = demoState->draw_plane;
+	demoState->rbDrawable[2] = demoState->draw_plane;
+	demoState->rbDrawable[3] = demoState->draw_plane;
+	demoState->rbDrawable[4] = demoState->draw_plane;
+	demoState->rbDrawable[5] = demoState->draw_plane;
 
-	demoState->rbDrawable[1] = demoState->draw_sphere;
-	demoState->rbDrawable[2] = demoState->draw_sphere;
-	demoState->rbDrawable[3] = demoState->draw_sphere;
-	demoState->rbDrawable[4] = demoState->draw_sphere;
+	demoState->rbDrawable[6] = demoState->draw_sphere;
+	demoState->rbDrawable[7] = demoState->draw_sphere;
+	demoState->rbDrawable[8] = demoState->draw_sphere;
 
-	demoState->rbDrawable[5] = demoState->draw_cylinder;
-	demoState->rbDrawable[6] = demoState->draw_cylinder;
-	demoState->rbDrawable[7] = demoState->draw_cylinder;
-	demoState->rbDrawable[8] = demoState->draw_cylinder;
-
-	demoState->rbDrawable[9] = demoState->draw_box;
-	demoState->rbDrawable[10] = demoState->draw_box;
-	demoState->rbDrawable[11] = demoState->draw_box;
-	demoState->rbDrawable[12] = demoState->draw_box;
+	demoState->rbDrawable[9] = demoState->draw_sphere;
+	demoState->rbDrawable[10] = demoState->draw_sphere;
+	demoState->rbDrawable[11] = demoState->draw_sphere;
+	demoState->rbDrawable[12] = demoState->draw_sphere;
 
 
 	// reset
@@ -852,10 +852,9 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 		// copy state
 		const a3_PhysicsWorldState worldState[1] = { *(demoState->physicsWorld->state) };
 
-		// copy other
-
 		// unlock
 		a3physicsUnlockWorld(demoState->physicsWorld);
+
 
 		// copy from physics world to demo state here
 		for (i = 0; i < worldState->count_rb; ++i)
@@ -882,8 +881,8 @@ void a3demo_update(a3_DemoState *demoState, double dt)
 	// apply scales
 	for (i = 0, tmpObject = demoState->physicsRigidbodies + i; i < demoState->rigidbodyObjects; ++i, ++tmpObject)
 		a3demo_applyScale_internal(demoState->physicsRigidbodies + i, tmpScale.m, 1);
-	for (i = 0, tmpObject = demoState->physicsParticles + i; i < demoState->particleObjects; ++i, ++tmpObject)
-		a3demo_applyScale_internal(demoState->physicsParticles + i, tmpScale.m, 1);
+	//for (i = 0, tmpObject = demoState->physicsParticles + i; i < demoState->particleObjects; ++i, ++tmpObject)
+	//	a3demo_applyScale_internal(demoState->physicsParticles + i, tmpScale.m, 1);
 }
 
 

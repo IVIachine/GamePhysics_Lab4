@@ -91,23 +91,22 @@ inline void a3demo_initializePhysicsThread(a3_DemoState *demoState)
 
 	// set object scales based on hull properties
 	// for ground, can set by reading first two values of properties list (width, height)
-	for (i = 0; i < 1; ++i)
+	for (i = 0; i < 6; ++i)
 	{
-		a3real3SetReal2Z(demoState->groundObject->scale.v, demoState->physicsWorld->hull_ground->prop, a3realOne);
-		demoState->groundObject->scaleMode = -1;
+		a3vec3 tmp;
+		tmp.x = 60.0f;
+		tmp.y = 60.0f;
+		tmp.z = 60.0f;
+
+		a3real3SetReal2Z(demoState->groundObject[i].scale.v, tmp.v, a3realOne);
+		demoState->groundObject[i].scaleMode = -1;
 	}
-	for (i = 0; i < 4; ++i)
+	for (i = 0; i < 7; ++i)
 	{
 		// uniform scale: radius
 		tmp0 = demoState->physicsWorld->hull_sphere[i].prop[a3hullProperty_radius];
 		a3real3Set(demoState->sphereObject[i].scale.v, tmp0, tmp0, tmp0);
 		demoState->sphereObject[i].scaleMode = +1;
-	}
-	for (i = 0; i < 4; ++i)
-	{
-		// non-uniform scale: read from first three properties (width, height, depth)
-		a3real3SetReal3(demoState->boxObject[i].scale.v, demoState->physicsWorld->hull_box[i].prop);
-		demoState->boxObject[i].scaleMode = -1;
 	}
 }
 

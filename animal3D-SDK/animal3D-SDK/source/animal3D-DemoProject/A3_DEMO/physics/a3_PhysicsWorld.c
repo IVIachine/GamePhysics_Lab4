@@ -117,7 +117,7 @@ int updateHulls(a3_PhysicsWorld * world)
 // internal utility for initializing and terminating physics world
 void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 {
-	unsigned int i, j;
+	//unsigned int i, j;
 
 	// e.g. reset all particles and/or rigid bodies
 	memset(world->rigidbody, 0, sizeof(world->rigidbody));
@@ -129,114 +129,113 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 
 
 	// set up rigid bodies to test ray picking
-	world->rigidbodiesActive = 13;
 	
 	// ****TO-DO: 
 	//	- add rotation to all
 	
 	// static shapes
+	world->rigidbodiesActive = 0;
 	
+	const a3real PLANE_SIZE = 30.0f;
+
+	world->rb_ground[0].position.x = a3realZero;
+	world->rb_ground[0].position.y = a3realZero;
+	world->rb_ground[0].position.z = a3realZero;
+	a3rigidbodySetMass(world->rb_ground, PLANE_SIZE);
+
+	a3collisionCreateHullPlane(world->hull_ground + 0, world->rb_ground + 0, world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
+
+	world->rb_ground[1].position.x = a3realZero;
+	world->rb_ground[1].position.y = a3realZero;
+	world->rb_ground[1].position.z = PLANE_SIZE;
+
+	a3rigidbodySetMass(world->rb_ground + 1, PLANE_SIZE);
+	a3vec3 axis;
+	axis.x = 0;
+	axis.y = 1;
+	axis.z = 0;
+
+	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 180.0f);
+	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
+		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
+
+	world->rb_ground[world->rigidbodiesActive].position.x = PLANE_SIZE;
+	world->rb_ground[world->rigidbodiesActive].position.y = a3realZero;
+	world->rb_ground[world->rigidbodiesActive].position.z = a3realZero;
+
+	a3rigidbodySetMass(world->rb_ground + 1, PLANE_SIZE);
+	axis.x = 0;
+	axis.y = 1;
+	axis.z = 0;
+
+	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 90.0f);
+	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
+		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
+
+	world->rb_ground[world->rigidbodiesActive].position.x = -PLANE_SIZE;
+	world->rb_ground[world->rigidbodiesActive].position.y = a3realZero;
+	world->rb_ground[world->rigidbodiesActive].position.z = a3realZero;
+
+	a3rigidbodySetMass(world->rb_ground + 1, PLANE_SIZE);
+	axis.x = 0;
+	axis.y = 1;
+	axis.z = 0;
+
+	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 270.0f);
+	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
+		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
+
+	world->rb_ground[world->rigidbodiesActive].position.x = a3realZero;
+	world->rb_ground[world->rigidbodiesActive].position.y = PLANE_SIZE;
+	world->rb_ground[world->rigidbodiesActive].position.z = a3realZero;
+
+	a3rigidbodySetMass(world->rb_ground + 1, PLANE_SIZE);
+	axis.x = 1;
+	axis.y = 0;
+	axis.z = 0;
+
+	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 270.0f);
+	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
+		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
+
+	world->rb_ground[world->rigidbodiesActive].position.x = a3realZero;
+	world->rb_ground[world->rigidbodiesActive].position.y = -PLANE_SIZE;
+	world->rb_ground[world->rigidbodiesActive].position.z = a3realZero;
+
+	a3rigidbodySetMass(world->rb_ground + 1, PLANE_SIZE);
+	axis.x = 1;
+	axis.y = 0;
+	axis.z = 0;
+
+	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 90.0f);
+	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
+		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
+		(a3real)(10.0), (a3real)(10.0), 2, a3axis_z);
+	++world->rigidbodiesActive;
 
 	world->rb_sphere[0].position.y = -10.0f;
 	world->rb_sphere[0].position.z = +5.0f;
 	a3rigidbodySetMass(world->rb_sphere, 1.5f);
 
-	world->rb_cylinder[0].position.y = 0.0f;
-	world->rb_cylinder[0].position.z = +5.0f;
-
-	world->rb_box[0].position.y = +10.0f;
-	world->rb_box[0].position.z = +5.0f;
-	a3rigidbodySetMass(world->rb_box, 1.5f);
-
-	// moving shapes
-	world->rb_sphere[1].position.x = -10.0f;
-	world->rb_sphere[1].position.y = -10.0f;
-	world->rb_sphere[1].position.z = +5.0f;
-	world->rb_sphere[1].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 1, 1.5f);
-
-	world->rb_cylinder[1].position.x = -25.0f;
-	world->rb_cylinder[1].position.y = -10.0f;
-	world->rb_cylinder[1].position.z = +5.0f;
-	world->rb_cylinder[1].velocity.x = +5.0f;
-
-	world->rb_box[1].position.x = -40.0f;
-	world->rb_box[1].position.y = -10.0f;
-	world->rb_box[1].position.z = +5.0f;
-	world->rb_box[1].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_box + 1, 1.5f);
-
-	world->rb_sphere[2].position.x = -10.0f;
-	world->rb_sphere[2].position.y = 0.0f;
-	world->rb_sphere[2].position.z = +5.0f;
-	world->rb_sphere[2].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 2, 1.5f);
-
-	world->rb_cylinder[2].position.x = -25.0f;
-	world->rb_cylinder[2].position.y = 0.0f;
-	world->rb_cylinder[2].position.z = +5.0f;
-	world->rb_cylinder[2].velocity.x = +5.0f;
-
-	world->rb_box[2].position.x = -40.0f;
-	world->rb_box[2].position.y = 0.0f;
-	world->rb_box[2].position.z = +5.0f;
-	world->rb_box[2].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_box + 2, 1.5f);
-
-	world->rb_sphere[3].position.x = -10.0f;
-	world->rb_sphere[3].position.y = +10.0f;
-	world->rb_sphere[3].position.z = +5.0f;
-	world->rb_sphere[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 3, 5.0f);
-
-	world->rb_cylinder[3].position.x = -25.0f;
-	world->rb_cylinder[3].position.y = +10.0f;
-	world->rb_cylinder[3].position.z = +5.0f;
-	world->rb_cylinder[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_cylinder + 3, 3.0f);
-
-	world->rb_box[3].position.x = -40.0f;
-	world->rb_box[3].position.y = +10.0f;
-	world->rb_box[3].position.z = +5.0f;
-	world->rb_box[3].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_box + 3, 4.0f);
-
-	world->rb_ground[0].position.y = -50.0f;
-	world->rb_ground[0].position.z = +5.0f;
-	world->rb_ground[0].velocity.y = +5.0f;
-	a3rigidbodySetMass(world->rb_ground, 2.0f);
 
 	// set up hulls
-	for (i = j = 0; i < 1; ++i, ++j)
-	a3collisionCreateHullPlane(world->hull_ground, world->rb_ground, world->state->transform_rb + j, world->state->transformInv_rb + j,
-		(a3real)(7.0), (a3real)(7.0), 2, a3axis_z);
 
-	for (i = 0; i < 4; ++i, ++j)
-		a3collisionCreateHullSphere(world->hull_sphere + i, world->rb_sphere + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-			a3randomRange(a3realHalf, a3realTwo));
-
-	for (i = 0; i < 4; ++i, ++j)
-		a3collisionCreateHullCylinder(world->hull_cylinder + i, world->rb_cylinder + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-			a3randomRange(a3realHalf, a3realTwo), a3randomRange(a3realOne, a3realFour), a3axis_z);
-
-	for (i = 0; i < 4; ++i, ++j)
+	for (int i = 0; i < 7; ++i, ++world->rigidbodiesActive)
 	{
-		if (i % 2 == 0)
-		{
-			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 2);
-		}
-		else
-		{
-			////Rotate a small amount
-			a3real4Set(world->state->rotation_rb[j].v, (a3real).18, (a3real).32, -(a3real).45, 1);
-			a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 1);
-
-			a3real3Set(world->rigidbody[j].velocity.v, a3realThree, 0, 0);
-			/*a3collisionCreateHullBox(world->hull_box + i, world->rb_box + i, world->state->transform_rb + j, world->state->transformInv_rb + j,
-				a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), a3randomRange(a3realOne, a3realFour), 2);*/
-		}
+		a3rigidbodySetMass(world->rb_sphere + i, 0.5f);
+		a3collisionCreateHullSphere(world->hull_sphere + i, world->rb_sphere + i, world->state->transform_rb + world->rigidbodiesActive,
+			world->state->transformInv_rb + world->rigidbodiesActive,
+			a3randomRange(a3realHalf, a3realTwo));
 	}
 
 	// no particles today
@@ -290,8 +289,8 @@ void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a,
 
 	a3real j = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v))/(a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
 
-	if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
-		printf("%lf\n", j);
+	//if (hull_a->type == a3hullType_sphere && hull_b->type == a3hullType_sphere)
+	//	printf("%lf\n", j);
 
 	a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_a[0].v, (j * hull_a->rb->massInv)));
 	a3real3Sub(hull_b->rb->velocity.v, a3real3ProductS(tmp.v, collision->normal_b[0].v, (j * hull_b->rb->massInv)));
@@ -379,7 +378,7 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 
 	for (unsigned int i = 0; i < world->numBSPs; ++i)
 	{
-		printf("BSP %i has %i hulls\n", i, world->bsps[i].numContainedHulls);
+		//printf("BSP %i has %i hulls\n", i, world->bsps[i].numContainedHulls);
 	}
 
 	// write operation is locked

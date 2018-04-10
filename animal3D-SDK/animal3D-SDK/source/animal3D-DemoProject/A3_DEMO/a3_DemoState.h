@@ -191,10 +191,8 @@ extern "C"
 				a3_DemoSceneObject graphicsCam[1];
 
 				// rigid body objects
-				a3_DemoSceneObject groundObject[1];
-				a3_DemoSceneObject sphereObject[4];
-				a3_DemoSceneObject cylinderObject[4];
-				a3_DemoSceneObject boxObject[4];
+				a3_DemoSceneObject groundObject[6];
+				a3_DemoSceneObject sphereObject[7];
 
 				// no named particles here
 			};
