@@ -182,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\a3_DemoState.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\a3_demo_callbacks.c" />
+    <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\BSP.cpp" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Collision.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Force.c" />
     <ClCompile Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Integration.c" />
@@ -195,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\a3_DemoState.h" />
+    <ClInclude Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\BSP.h" />
     <ClInclude Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Collision.h" />
     <ClInclude Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Force.h" />
     <ClInclude Include="..\..\..\source\animal3D-DemoProject\A3_DEMO\physics\a3_Integration.h" />

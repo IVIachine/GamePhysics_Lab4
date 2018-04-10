@@ -45,7 +45,7 @@ project on its database.
 // physics includes
 
 #include "a3_Collision.h"
-
+#include "../BSP.h"
 
 //-----------------------------------------------------------------------------
 
@@ -65,6 +65,7 @@ extern "C"
 	{
 		physicsMaxCount_particle = 32,
 		physicsMaxCount_rigidbody = 32,
+		physicsMaxCount_bsp = 32,
 	};
 
 
@@ -150,7 +151,8 @@ extern "C"
 
 		double t;
 
-
+		BSP bsps[physicsMaxCount_bsp];
+		unsigned int numBSPs;
 		//---------------------------------------------------------------------
 	};
 
