@@ -135,7 +135,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3rigidbodySetMass(world->rb_ground, 1.0f);
 
 	a3collisionCreateHullPlane(world->hull_ground + 0, world->rb_ground + 0, world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_ground[1].position.x = a3realZero;
@@ -151,7 +151,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 180.0f);
 	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
 		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_ground[world->rigidbodiesActive].position.x = PLANE_SIZE;
@@ -166,7 +166,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 90.0f);
 	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
 		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_ground[world->rigidbodiesActive].position.x = -PLANE_SIZE;
@@ -181,7 +181,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 270.0f);
 	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
 		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_ground[world->rigidbodiesActive].position.x = a3realZero;
@@ -196,7 +196,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 270.0f);
 	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
 		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_ground[world->rigidbodiesActive].position.x = a3realZero;
@@ -211,7 +211,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	a3quaternionCreateAxisAngle(world->state->rotation_rb[world->rigidbodiesActive].v, axis.v, 90.0f);
 	a3collisionCreateHullPlane(world->hull_ground + world->rigidbodiesActive, world->rb_ground + world->rigidbodiesActive,
 		world->state->transform_rb + world->rigidbodiesActive, world->state->transformInv_rb + world->rigidbodiesActive,
-		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 1, a3axis_z);
+		(a3real)(PLANE_SIZE), (a3real)(PLANE_SIZE), 2, a3axis_z);
 	++world->rigidbodiesActive;
 
 	world->rb_sphere[0].position.y = -10.0f;
@@ -224,13 +224,13 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_sphere[1].position.y = -10.0f;
 	world->rb_sphere[1].position.z = +5.0f;
 	world->rb_sphere[1].velocity.x = +15.0f;
-	a3rigidbodySetMass(world->rb_sphere + 1, 0.5f);
+	a3rigidbodySetMass(world->rb_sphere + 1, 1.5f);
 
 	world->rb_sphere[2].position.x = -10.0f;
 	world->rb_sphere[2].position.y = 0.0f;
 	world->rb_sphere[2].position.z = +5.0f;
 	world->rb_sphere[2].velocity.x = +5.0f;
-	a3rigidbodySetMass(world->rb_sphere + 2, 0.5f);
+	a3rigidbodySetMass(world->rb_sphere + 2, 1.5f);
 
 	world->rb_sphere[3].position.x = -10.0f;
 	world->rb_sphere[3].position.y = +10.0f;
@@ -241,7 +241,7 @@ void a3physicsInitialize_internal(a3_PhysicsWorld *world)
 	world->rb_sphere[4].position.x = -15.0f;
 	world->rb_sphere[4].position.y = +10.0f;
 	world->rb_sphere[4].position.z = +5.0f;
-	world->rb_sphere[3].velocity.x = +5.0f;
+	world->rb_sphere[3].velocity.x = +25.0f;
 	a3rigidbodySetMass(world->rb_sphere + 3, 0.5f);
 
 	for (int i = 0; i < 5; ++i, ++world->rigidbodiesActive)
@@ -282,10 +282,11 @@ void a3handleCollision(a3_ConvexHullCollision* collision, a3_ConvexHull* hull_a,
 	a3vec3 rVel;
 	a3real3Diff(rVel.v, hull_a->rb->velocity.v, hull_b->rb->velocity.v);
 
-	a3real j1 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v)) / (a3real3Dot(collision->normal_a[0].v, collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
+	a3real j1 = (-a3realTwo * a3real3Dot(rVel.v, collision->normal_a[0].v)) / (a3real3Dot(collision->normal_a[0].v, 
+		collision->normal_a[0].v)*(hull_a->rb->massInv + hull_b->rb->massInv));
 
-	a3real3ProductS(hull_a->rb->velocity.v, collision->normal_a[0].v, (j1 * hull_a->rb->mass));
-	a3real3ProductS(hull_b->rb->velocity.v, collision->normal_b[0].v, (j1 * hull_b->rb->mass));
+	a3real3Add(hull_a->rb->velocity.v, a3real3ProductS(rVel.v, collision->normal_a[0].v, (j1 * hull_a->rb->massInv)));
+	a3real3Add(hull_b->rb->velocity.v, a3real3ProductS(rVel.v, collision->normal_b[0].v, (j1 * hull_b->rb->massInv)));
 }
 
 // physics simulation
@@ -320,7 +321,7 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 	for (int i = 0; i < 5; i++)
 	{
 		a3forceGravity(tmp.v, a3zVec3.v, world->hull_sphere[i].rb->mass);
-		world->hull_sphere[i].rb->force = tmp;
+		a3real3Add(world->hull_sphere[i].rb->force.v, tmp.v);
 		a3real3Add(world->hull_sphere[i].rb->force.v,
 			a3forceDrag(tmp.v, world->hull_sphere[i].rb->velocity.v, a3zeroVec3.v, 1.2f, world->hull_sphere[i].prop[a3hullProperty_radius], .47f));
 	}
@@ -347,7 +348,6 @@ void a3physicsUpdate(a3_PhysicsWorld *world, double dt)
 					{
 						a3handleCollision(collision, world->bsps[x].containedHulls[i], world->bsps[x].containedHulls[j]);
 					}
-
 				}
 			}
 		}
