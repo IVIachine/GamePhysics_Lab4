@@ -90,7 +90,12 @@ int updateHulls(a3_PhysicsWorld * world)
 	{
 		for (unsigned int j = 0; j < world->numBSPs; ++j)
 		{
-			if ((world->bsps[j].min.x <= (world->rigidbody + i)->position.x && world->bsps[j].max.x >= (world->rigidbody + i)->position.x) &&
+			if (world->hull[i].type == a3hullType_plane)
+			{
+				world->bsps[j].containedHulls[world->bsps[j].numContainedHulls] = world->hull + i;
+				++world->bsps[j].numContainedHulls;
+			}
+			else if ((world->bsps[j].min.x <= (world->rigidbody + i)->position.x && world->bsps[j].max.x >= (world->rigidbody + i)->position.x) &&
 				(world->bsps[j].min.y <= (world->rigidbody + i)->position.y && world->bsps[j].max.y >= (world->rigidbody + i)->position.y) &&
 				(world->bsps[j].min.z <= (world->rigidbody + i)->position.z && world->bsps[j].max.z >= (world->rigidbody + i)->position.z))
 			{
