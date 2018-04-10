@@ -181,6 +181,7 @@ inline int a3collisionTestSphereAABB(a3_ConvexHullCollision *collision_out,
 		collision_out->contactCount_a = collision_out->contactCount_b = 1;
 		collision_out->contact_a[0] = collision_out->contact_b[0] = tmp;
 		a3real3Normalize(diff_tmp);
+
 		a3real3Set(collision_out->normal_b[0].v, diff_tmp[0], diff_tmp[1], diff_tmp[2]);
 		a3real3Set(collision_out->normal_a[0].v, -diff_tmp[0], -diff_tmp[1], -diff_tmp[2]);
 		return 1;
