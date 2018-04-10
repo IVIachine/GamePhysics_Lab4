@@ -35,7 +35,11 @@ inline a3real4r a3rigidbodyMultiplyVec3Quat(a3real4p q_out, const a3real3p vL, c
 {
 	// ****TO-DO: 
 	//	- implement simplified quaternion multiplication
-
+	a3real3 tmp;
+	a3real3ProductS(tmp, vL, qR[3]);
+	a3real3Cross(q_out, vL, qR);
+	a3real3Add(q_out, tmp);
+	q_out[3] = -a3real3Dot(vL, qR);
 
 	// done
 	return q_out;
@@ -46,7 +50,9 @@ inline a3real3r a3rigidbodyTransformPoint3_internal(a3real3p v_out, const a3real
 {
 	// ****TO-DO: 
 	//	- transform vector by matrix
-
+	v_out[0] = t[0][0] * v[0] + t[1][0] * v[1] + t[2][0] * v[2] + t[3][0];
+	v_out[1] = t[0][1] * v[0] + t[1][1] * v[1] + t[2][1] * v[2] + t[3][1];
+	v_out[2] = t[0][2] * v[0] + t[1][2] * v[1] + t[2][2] * v[2] + t[3][2];
 
 	// done
 	return v_out;
@@ -60,8 +66,30 @@ inline a3real3x3r a3rigidbodyRebaseMatrix_internal(a3real3x3p m_out, const a3rea
 	//		final = t * m * t^-1
 	//	- if we know t represents a rotation then its inverse is its transpose
 	//	- possibly messy but that means direct and therefore efficient
+	a3real3x3 tmp;
+	tmp[0][0] = m[0][0] * t[0][0] + m[1][0] * t[1][0] + m[2][0] * t[2][0];
+	tmp[0][1] = m[0][1] * t[0][0] + m[1][1] * t[1][0] + m[2][1] * t[2][0];
+	tmp[0][2] = m[0][2] * t[0][0] + m[1][2] * t[1][0] + m[2][2] * t[2][0];
 
+	tmp[1][0] = m[0][0] * t[0][1] + m[1][0] * t[1][1] + m[2][0] * t[2][1];
+	tmp[1][1] = m[0][1] * t[0][1] + m[1][1] * t[1][1] + m[2][1] * t[2][1];
+	tmp[1][2] = m[0][2] * t[0][1] + m[1][2] * t[1][1] + m[2][2] * t[2][1];
 
+	tmp[2][0] = m[0][0] * t[0][2] + m[1][0] * t[1][2] + m[2][0] * t[2][2];
+	tmp[2][1] = m[0][1] * t[0][2] + m[1][1] * t[1][2] + m[2][1] * t[2][2];
+	tmp[2][2] = m[0][2] * t[0][2] + m[1][2] * t[1][2] + m[2][2] * t[2][2];
+
+	m_out[0][0] = t[0][0] * tmp[0][0] + t[1][0] * tmp[0][1] + t[2][0] * tmp[0][2];
+	m_out[0][1] = t[0][1] * tmp[0][0] + t[1][1] * tmp[0][1] + t[2][1] * tmp[0][2];
+	m_out[0][2] = t[0][2] * tmp[0][0] + t[1][2] * tmp[0][1] + t[2][2] * tmp[0][2];
+
+	m_out[1][0] = t[0][0] * tmp[1][0] + t[1][0] * tmp[1][1] + t[2][0] * tmp[1][2];
+	m_out[1][1] = t[0][1] * tmp[1][0] + t[1][1] * tmp[1][1] + t[2][1] * tmp[1][2];
+	m_out[1][2] = t[0][2] * tmp[1][0] + t[1][2] * tmp[1][1] + t[2][2] * tmp[1][2];
+
+	m_out[2][0] = t[0][0] * tmp[2][0] + t[1][0] * tmp[2][1] + t[2][0] * tmp[2][2];
+	m_out[2][1] = t[0][1] * tmp[2][0] + t[1][1] * tmp[2][1] + t[2][1] * tmp[2][2];
+	m_out[2][2] = t[0][2] * tmp[2][0] + t[1][2] * tmp[2][1] + t[2][2] * tmp[2][2];
 	// done
 	return m_out;
 }
@@ -161,10 +189,10 @@ extern inline int a3rigidbodySetLocalInertiaTensorSphereSolid(a3_RigidBody *rb, 
 {
 	if (rb)
 	{
-	//	a3mat3 I = a3identityMat3;
+		a3mat3 I = a3identityMat3;
 
 		// ****TO-DO: 
-
+		a3real3x3ProductS(rb->inertiaTensor_t.m, I.m, (a3realTwo / a3realFive) * rb->mass * (radius * radius));
 		return 1;
 	}
 	return 0;
@@ -346,6 +374,10 @@ extern inline int a3rigidbodyApplyForceLocation(a3_RigidBody *rb, const a3real3p
 		// ****TO-DO: 
 		//	arm = loc - c_mass
 		//	torque += arm x F_applied
+		a3real3 torque, arm;
+		a3real3Diff(arm, loc, rb->centerMass_t.v);
+		a3real3Cross(torque, arm, f);
+		a3real3Add(rb->torque.v, torque);
 
 		return 1;
 	}
@@ -423,7 +455,9 @@ extern inline int a3rigidbodyUpdateInertiaTensor(a3_RigidBody *rb, const a3real4
 		// change of basis: 
 		//	- current tensor is R*I*R^-1
 		//	- current tensor inverse is R*I^-1*R^-1
-		
+		a3rigidbodyRebaseMatrix_internal(rb->inertiaTensor_t.m, rb->inertiaTensor.m, transform);
+		a3rigidbodyRebaseMatrix_internal(rb->intertiaTensorInv_t.m, rb->intertiaTensorInv.m, transform);
+
 		return 1;
 	}
 	return 0;
